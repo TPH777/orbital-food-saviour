@@ -28,16 +28,14 @@ export function Home() {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th scope="col">#</th>
             <th scope="col">Food</th>
             <th scope="col">Price</th>
             <th scope="col">Business</th>
           </tr>
         </thead>
         <tbody>
-          {foodList.map((food, index) => (
+          {foodList.map((food) => (
             <tr>
-              <th scope="row">{index}</th>
               <td>{food.name}</td>
               <td>${food.price}</td>
               <td>{food.business}</td>

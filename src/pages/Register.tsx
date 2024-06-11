@@ -28,8 +28,7 @@ export const RegisterPage = () => {
       .then((user) => {
         updateProfile(user.user, {
           displayName: name,
-        });
-        navigate("/dashboard");
+        }).then(() => navigate("/dashboard"));
       })
       .catch((error) => {
         if (error.code.includes("auth/weak-password")) {

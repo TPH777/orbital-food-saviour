@@ -17,7 +17,7 @@ export const LoginPage = () => {
     setAuthenticating(true);
     signInWithEmailAndPassword(auth, email, password)
       .then(() => {
-        navigate("/");
+        navigate("/dashboard");
       })
       .catch((error) => {
         setAuthenticating(false);
