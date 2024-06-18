@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 import swal from "sweetalert";
 
-import { auth } from "../config/firebase";
-import { db } from "../config/firebase";
-import { doc, getDocs, collection, deleteDoc } from "firebase/firestore";
+import { auth, db } from "../config/firebase";
+import {
+  doc,
+  getDocs,
+  collection,
+  deleteDoc,
+  getDoc,
+} from "firebase/firestore";
 
 import ErrorText from "../components/ErrorText";
-import { Table } from "../components/Table";
+import { Cards } from "../components/Cards";
 import { Edit } from "../components/Edit";
 import { Add } from "../components/Add";
+import { deleteObject, getStorage, ref } from "firebase/storage";
 
 export function Dashboard() {
   const user = auth.currentUser;
@@ -42,25 +48,30 @@ export function Dashboard() {
   }, []);
 
   const deleteFood = async (id: string) => {
-    const foodDoc = doc(db, "food", id);
     swal({
       icon: "warning",
       title: "Are you sure?",
       text: "You won't be able to revert this!",
-      buttons: { cancel: true, confirm: true },
-    }).then((result: any) => {
-      if (result.value) {
+      buttons: [true, true],
+    }).then(async (result: boolean) => {
+      if (result) {
         try {
+          const foodDoc = doc(db, "food", id);
+          const data = (await getDoc(foodDoc)).data();
+          if (data !== undefined) {
+            deleteObject(ref(getStorage(), data.imagePath));
+          }
           deleteDoc(foodDoc);
           swal({
             icon: "success",
             title: "Deleted!",
-            text: `${foodDoc} Data has been deleted.`,
-            timer: 1500,
+            text: `Data has been deleted.`,
+            buttons: [false],
+            timer: 1000,
           });
           getFoodList();
         } catch (error) {
-          setError("delete failed");
+          console.log(error);
         }
       }
     });
@@ -87,7 +98,7 @@ export function Dashboard() {
             </button>
           </div>
           <br />
-          <Table
+          <Cards
             user={user}
             foodList={foodList}
             updateFood={updateFood}

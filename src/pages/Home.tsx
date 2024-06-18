@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { db } from "../config/firebase";
 import { getDocs, collection } from "firebase/firestore";
+import Card from "react-bootstrap/Card";
+import { Col, Row } from "react-bootstrap";
 
 export function Home() {
   const [foodList, setFoodList] = useState<any[]>([]);
@@ -24,25 +26,20 @@ export function Home() {
   }, []);
 
   return (
-    <>
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th scope="col">Food</th>
-            <th scope="col">Price</th>
-            <th scope="col">Business</th>
-          </tr>
-        </thead>
-        <tbody>
-          {foodList.map((food) => (
-            <tr>
-              <td>{food.name}</td>
-              <td>${food.price}</td>
-              <td>{food.business}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
+    <Row md={4} className="g-4">
+      {foodList.map((food) => (
+        <Col>
+          <Card style={{ width: "18rem" }}>
+            <Card.Img variant="top" src={food.imageURL} />
+            <Card.Body>
+              <Card.Title>{food.name}</Card.Title>
+              <Card.Subtitle>${food.price}</Card.Subtitle>
+              <br />
+              <Card.Text>Prepared by: {food.business}</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+      ))}
+    </Row>
   );
 }

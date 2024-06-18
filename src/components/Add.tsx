@@ -1,7 +1,9 @@
 import { addDoc, collection } from "firebase/firestore";
 import swal from "sweetalert";
-import { auth, db } from "../config/firebase";
+import { auth, db, storage } from "../config/firebase";
 import { useState } from "react";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
 
 export const Add = ({
   getFoodList,
@@ -10,24 +12,23 @@ export const Add = ({
   getFoodList: Function;
   setIsAdding: Function;
 }) => {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState(0);
+  const [name, setName] = useState<string>("");
+  const [price, setPrice] = useState<number>(0);
+  const [image, setImage] = useState<File>();
   const user = auth.currentUser;
   if (!user) {
     return;
   }
 
-  const handleAdd = async (e: any) => {
+  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImage(e.target.files[0]);
+    }
+  };
+
+  const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // To prevent the default form submission to trigger a full page reload
 
-    if (!name || !price) {
-      // Empty Input
-      return swal({
-        icon: "error",
-        title: "Error!",
-        text: "All fields are required.",
-      });
-    }
     if (price <= 0) {
       // Invalid input
       return swal({
@@ -37,24 +38,55 @@ export const Add = ({
       });
     }
 
+    if (!name || !price || !image) {
+      // Empty Input
+      return swal({
+        icon: "error",
+        title: "Error!",
+        text: "All fields are required.",
+      });
+    }
+
+    const imageExt = image.type.split("/")[1]; // Invalid file type
+    if (imageExt !== "jpeg" && imageExt !== "jpg" && imageExt !== "png") {
+      return swal({
+        icon: "error",
+        title: "Error!",
+        text: "Invalid image, file extension must be .jpeg, .jpg or .png",
+      });
+    }
+
+    // Upload image to storage
+    const imagePath = "images/" + `${user.uid}/` + uuidv4();
+    const storageRef = ref(storage, imagePath);
     try {
-      await addDoc(collection(db, "food"), {
-        name: name,
-        price: price,
-        userId: user.uid,
-        business: user.displayName,
-      });
-      setIsAdding(false);
-      getFoodList();
-      swal({
-        icon: "success",
-        title: "Added!",
-        text: `${name} of $${price} has been Added.`,
-        timer: 1500,
-      });
+      await uploadBytes(storageRef, image);
     } catch (error) {
       console.log(error);
     }
+
+    getDownloadURL(storageRef) // Download image url
+      .then(async (url) => {
+        const imageURL = url;
+        await addDoc(collection(db, "food"), {
+          name: name,
+          price: price,
+          userId: user.uid,
+          business: user.displayName,
+          imageURL: imageURL,
+          imagePath: imagePath,
+        });
+        setIsAdding(false);
+        getFoodList();
+        swal({
+          icon: "success",
+          title: "Added!",
+          text: `${name} of $${price} has been Added.`,
+          timer: 1000,
+          buttons: [false],
+        });
+      })
+      .catch((error) => console.log(error));
   };
 
   return (
@@ -66,7 +98,6 @@ export const Add = ({
           id="name"
           type="text"
           name="name"
-          value={name}
           className="form-control"
           onChange={(e) => setName(e.target.value)}
         />
@@ -77,9 +108,17 @@ export const Add = ({
           id="price"
           type="number"
           name="price"
-          value={price}
           className="form-control"
           onChange={(e) => setPrice(Number(e.target.value))}
+        />
+      </div>
+      <label>Image</label>
+      <div className="input-group mb-3">
+        <input
+          type="file"
+          className="form-control"
+          id="image"
+          onChange={handleImage}
         />
       </div>
       <input className="btn btn-primary mb-4" type="submit" value="Add" />

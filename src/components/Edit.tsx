@@ -1,7 +1,8 @@
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import swal from "sweetalert";
-import { db } from "../config/firebase";
+import { db, storage } from "../config/firebase";
 import { useState } from "react";
+import { ref, uploadBytes } from "firebase/storage";
 
 export const Edit = ({
   foodList,
@@ -17,17 +18,16 @@ export const Edit = ({
   const [food] = foodList.filter((food: any) => food.id === selectedFoodId);
   const [name, setName] = useState(food.name);
   const [price, setPrice] = useState(food.price);
+  const [image, setImage] = useState<File>();
 
-  const handleUpdate = async (e: any) => {
-    e.preventDefault();
-
-    if (!name || !price) {
-      return swal({
-        icon: "error",
-        title: "Error!",
-        text: "All fields are required.",
-      });
+  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImage(e.target.files[0]);
     }
+  };
+
+  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
     if (price <= 0) {
       // Invalid input
@@ -36,6 +36,37 @@ export const Edit = ({
         title: "Error!",
         text: "Price must be greater than 0",
       });
+    }
+
+    if (!name || !price) {
+      // Empty Input
+      return swal({
+        icon: "error",
+        title: "Error!",
+        text: "All fields are required.",
+      });
+    }
+
+    if (image) {
+      const imageExt = image.type.split("/")[1]; // Invalid file type
+      if (imageExt !== "jpeg" && imageExt !== "jpg" && imageExt !== "png") {
+        return swal({
+          icon: "error",
+          title: "Error!",
+          text: "Invalid image, file extension must be .jpeg, .jpg or .png",
+        });
+      }
+
+      const foodDoc = doc(db, "food", selectedFoodId);
+      const data = (await getDoc(foodDoc)).data();
+      if (data) {
+        const storageRef = ref(storage, data.imagePath);
+        try {
+          await uploadBytes(storageRef, image);
+        } catch (error) {
+          console.log(error);
+        }
+      }
     }
 
     try {
@@ -48,8 +79,9 @@ export const Edit = ({
       swal({
         icon: "success",
         title: "Updated!",
-        text: `Data has been updated.`,
-        timer: 1500,
+        text: `${name} has been updated.`,
+        timer: 1200,
+        buttons: [false],
       });
     } catch (error) {
       console.log(error);
@@ -79,6 +111,15 @@ export const Edit = ({
           value={price}
           className="form-control"
           onChange={(e) => setPrice(Number(e.target.value))}
+        />
+      </div>
+      <label>Image</label>
+      <div className="input-group mb-3">
+        <input
+          type="file"
+          className="form-control"
+          id="image"
+          onChange={handleImage}
         />
       </div>
       <input className="btn btn-primary mb-4" type="submit" value="Update" />

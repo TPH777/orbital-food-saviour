@@ -7,7 +7,7 @@ export function Layout() {
     <>
       <NavBar />
       <br />
-      <main className="text-start">
+      <main>
         <Outlet />
       </main>
     </>

@@ -16,7 +16,7 @@ export function NavBar() {
     <>
       <nav className="navbar bg-body-tertiary">
         <form className="container-fluid">
-          <button className="btn " type="button" onClick={() => navigate("/")}>
+          <button className="btn" type="button" onClick={() => navigate("/")}>
             Food Saviour
           </button>
           {user ? (
