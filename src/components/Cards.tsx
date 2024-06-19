@@ -17,15 +17,11 @@ export const Cards = ({
         (food) =>
           food.userId == user.uid && (
             <Col>
-              <Card style={{ width: "18rem" }}>
+              <Card style={{ width: "18rem" }} key={food}>
                 <Card.Img
                   className=".card-img-top"
                   variant="top"
-                  src={
-                    food.imageURL
-                      ? food.imageURL
-                      : "https://t4.ftcdn.net/jpg/04/73/25/49/360_F_473254957_bxG9yf4ly7OBO5I0O5KABlN930GwaMQz.jpg"
-                  }
+                  src={food.imageURL}
                 />
                 <Card.Body>
                   <Card.Title>{food.name}</Card.Title>

@@ -29,7 +29,7 @@ export function Home() {
     <Row md={4} className="g-4">
       {foodList.map((food) => (
         <Col>
-          <Card style={{ width: "18rem" }}>
+          <Card style={{ width: "18rem" }} key={food}>
             <Card.Img variant="top" src={food.imageURL} />
             <Card.Body>
               <Card.Title>{food.name}</Card.Title>

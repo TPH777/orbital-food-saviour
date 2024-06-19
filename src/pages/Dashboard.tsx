@@ -18,9 +18,6 @@ import { deleteObject, getStorage, ref } from "firebase/storage";
 
 export function Dashboard() {
   const user = auth.currentUser;
-  if (!user) {
-    return;
-  }
 
   const [error, setError] = useState<string>("");
   const [isAdding, setIsAdding] = useState(false);
