@@ -7,7 +7,7 @@ import { Search } from "../components/Search";
 
 export function Home() {
   const [foodList, setFoodList] = useState<any[]>([]);
-  const [searchFoodList, setSearchFoodList] = useState<any[]>([]);
+  const [query, setQuery] = useState<string>("");
   const foodCollectionRef = collection(db, "food");
 
   const getFoodList = async () => {
@@ -18,7 +18,6 @@ export function Home() {
         id: doc.id,
       }));
       setFoodList(filteredData);
-      setSearchFoodList(filteredData);
     } catch (error) {
       console.error(error);
     }
@@ -28,26 +27,19 @@ export function Home() {
     getFoodList();
   }, []);
 
-  const handleSearch = (name: String) => {
-    if (name.trim() === "") {
-      setSearchFoodList(foodList);
-    } else {
-      const searchFoods = foodList.filter((food) =>
-        food.name.toLowerCase().includes(name.toLowerCase())
-      );
-      setSearchFoodList(searchFoods);
-    }
-  };
+  const searchFoodList = foodList.filter((food) =>
+    food.name.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
     <>
-      <Search onSearch={handleSearch} />
+      <Search setQuery={(query: string) => setQuery(query)} />
       <br />
 
       {searchFoodList && searchFoodList.length > 0 ? (
         <Row md={4} className="g-4">
           {searchFoodList.map((food) => (
-            <Col>
+            <Col key={food.id}>
               <Card style={{ width: "18rem" }} key={food}>
                 <Card.Img variant="top" src={food.imageURL} />
                 <Card.Body>

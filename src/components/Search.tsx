@@ -1,6 +1,6 @@
-export const Search = ({ onSearch }: { onSearch: Function }) => {
+export const Search = ({ setQuery }: { setQuery: Function }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onSearch(e.target.value); // Pass the name back to the parent component
+    setQuery(e.target.value); // Pass the name back to the parent component
   };
 
   return (
@@ -12,9 +12,6 @@ export const Search = ({ onSearch }: { onSearch: Function }) => {
           placeholder="What are you looking for?"
           onChange={handleChange}
         />
-        {/* <button type="button" className="searchButton">
-          <i className="fa fa-search"></i>
-        </button> */}
       </div>
     </div>
   );

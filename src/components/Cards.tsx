@@ -18,8 +18,8 @@ export const Cards = ({
           {foodList.map(
             (food) =>
               food.userId == user.uid && (
-                <Col key={food}>
-                  <Card style={{ width: "18rem" }}>
+                <Col key={food.id}>
+                  <Card style={{ width: "18rem" }} key={food}>
                     <Card.Img
                       className="card-img-top"
                       variant="top"
