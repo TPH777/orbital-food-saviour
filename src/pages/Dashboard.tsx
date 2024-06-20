@@ -15,6 +15,7 @@ import { Cards } from "../components/Cards";
 import { Edit } from "../components/Edit";
 import { Add } from "../components/Add";
 import { deleteObject, getStorage, ref } from "firebase/storage";
+import { Search } from "../components/Search";
 
 export function Dashboard() {
   const user = auth.currentUser;
@@ -25,6 +26,7 @@ export function Dashboard() {
   const [isEditing, setIsEditing] = useState(false);
 
   const [foodList, setFoodList] = useState<any[]>([]);
+  const [searchFoodList, setSearchFoodList] = useState<any[]>([]);
   const foodCollectionRef = collection(db, "food");
 
   const getFoodList = async () => {
@@ -35,6 +37,7 @@ export function Dashboard() {
         id: doc.id,
       }));
       setFoodList(filteredData);
+      setSearchFoodList(filteredData);
     } catch (error) {
       setError("get failed");
     }
@@ -79,6 +82,18 @@ export function Dashboard() {
     setIsEditing(true);
   };
 
+  const handleSearch = (name: String) => {
+    if (name.trim() === "") {
+      setSearchFoodList(foodList);
+    } else {
+      const searchFoods = foodList.filter((food) =>
+        food.name.toLowerCase().includes(name.toLowerCase())
+      );
+      setSearchFoodList(searchFoods);
+      console.log(searchFoodList);
+    }
+  };
+
   return (
     <>
       <h1>{user?.displayName}'s Dashboard</h1>
@@ -95,9 +110,11 @@ export function Dashboard() {
             </button>
           </div>
           <br />
+          <Search onSearch={handleSearch} />
+          <br />
           <Cards
             user={user}
-            foodList={foodList}
+            foodList={searchFoodList}
             updateFood={updateFood}
             deleteFood={deleteFood}
           />

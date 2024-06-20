@@ -76,13 +76,17 @@ export const Edit = ({
       });
       setIsEditing(false);
       getFoodList();
-      swal({
+      await swal({
         icon: "success",
         title: "Updated!",
         text: `${name} has been updated.`,
         timer: 1200,
         buttons: [false],
       });
+      if (image) {
+        // To refresh image
+        window.location.reload();
+      }
     } catch (error) {
       console.log(error);
     }
