@@ -1,24 +1,23 @@
 import { addDoc, collection } from "firebase/firestore";
-import swal from "sweetalert";
-import { auth, db, storage } from "../config/firebase";
+import { db, storage } from "../config/firebase";
 import { useState } from "react";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
+import { addSuccess, invalidInputWarning } from "../functions/Alert";
+import { CrudForm } from "./CrudForm";
 
-export const Add = ({
-  getFoodList,
-  setIsAdding,
-}: {
+interface AddProps {
+  user: any;
   getFoodList: Function;
-  setIsAdding: Function;
-}) => {
+  setIsAdding: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const Add = ({ user, getFoodList, setIsAdding }: AddProps) => {
   const [name, setName] = useState<string>("");
   const [price, setPrice] = useState<number>(0);
-  const [image, setImage] = useState<File>();
-  const user = auth.currentUser;
-  if (!user) {
-    return;
-  }
+  const [image, setImage] = useState<any>();
+  const [post, setPost] = useState<boolean>(false);
+  const [date, setDate] = useState<Date>(new Date());
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -29,31 +28,8 @@ export const Add = ({
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // To prevent the default form submission to trigger a full page reload
 
-    if (price <= 0) {
-      // Invalid input
-      return swal({
-        icon: "error",
-        title: "Error!",
-        text: "Price must be greater than 0",
-      });
-    }
-
-    if (!name || !price || !image) {
-      // Empty Input
-      return swal({
-        icon: "error",
-        title: "Error!",
-        text: "All fields are required.",
-      });
-    }
-
-    const imageExt = image.type.split("/")[1]; // Invalid file type
-    if (imageExt !== "jpeg" && imageExt !== "jpg" && imageExt !== "png") {
-      return swal({
-        icon: "error",
-        title: "Error!",
-        text: "Invalid image, file extension must be .jpeg, .jpg or .png",
-      });
+    if (invalidInputWarning(name, price, image, date, true)) {
+      return;
     }
 
     // Upload image to storage
@@ -71,6 +47,8 @@ export const Add = ({
         await addDoc(collection(db, "food"), {
           name: name,
           price: price,
+          date: date,
+          post: post,
           userId: user.uid,
           business: user.displayName,
           imageURL: imageURL,
@@ -78,57 +56,25 @@ export const Add = ({
         });
         setIsAdding(false);
         getFoodList();
-        swal({
-          icon: "success",
-          title: "Added!",
-          text: `${name} of $${price} has been Added.`,
-          timer: 1000,
-          buttons: [false],
-        });
+        addSuccess(name, price);
       })
       .catch((error) => console.log(error));
   };
 
   return (
-    <form onSubmit={handleAdd}>
-      <h2>Add Food</h2>
-      <div className="form-outline mb-4">
-        <label>Name</label>
-        <input
-          id="name"
-          type="text"
-          name="name"
-          className="form-control"
-          onChange={(e) => setName(e.target.value)}
-        />
-      </div>
-      <div className="form-outline mb-4">
-        <label>Price</label>
-        <input
-          id="price"
-          type="number"
-          name="price"
-          className="form-control"
-          onChange={(e) => setPrice(Number(e.target.value))}
-        />
-      </div>
-      <label>Image</label>
-      <div className="input-group mb-3">
-        <input
-          type="file"
-          className="form-control"
-          id="image"
-          onChange={handleImage}
-        />
-      </div>
-      <input className="btn btn-primary mb-4" type="submit" value="Add" />
-      <input
-        style={{ marginLeft: "12px" }}
-        className="btn btn-danger mb-4"
-        type="button"
-        value="Cancel"
-        onClick={() => setIsAdding(false)}
-      />
-    </form>
+    <CrudForm
+      add={true}
+      name={""}
+      price={0}
+      date={date}
+      post={post}
+      setName={setName}
+      setPrice={setPrice}
+      setPost={setPost}
+      setDate={setDate}
+      handleForm={handleAdd}
+      handleImage={handleImage}
+      setInProgress={setIsAdding}
+    />
   );
 };

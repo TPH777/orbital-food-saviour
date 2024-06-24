@@ -33,7 +33,7 @@ export const LoginPage = () => {
     setAuthenticating(true);
     signInWithPopup(auth, googleProvider)
       .then(() => {
-        navigate("/navigate");
+        navigate("/dashboard");
       })
       .catch((error) => {
         setAuthenticating(false);

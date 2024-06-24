@@ -2,7 +2,7 @@ import { User, onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../config/firebase";
 import { useEffect, useState } from "react";
-import { Container, Navbar } from "react-bootstrap";
+import { Button, Container, Nav, Navbar } from "react-bootstrap";
 
 export function NavBar() {
   let navigate = useNavigate();
@@ -22,41 +22,38 @@ export function NavBar() {
 
   const Logout = () => {
     signOut(auth)
-      .then(() => navigate("/"))
+      .then(() => {
+        navigate("/");
+        window.location.reload();
+      })
       .catch((error) => console.error(error));
   };
 
   return (
-    <Navbar className="bg-body-tertiary">
-      <Container fluid>
-        <Navbar.Brand href="#">Food Saviour</Navbar.Brand>
+    <Navbar className="bg-body-tertiary" bg="dark" data-bs-theme="dark">
+      <Container>
+        <Navbar.Brand href="#">
+          <img
+            src="src\pictures\food-saviour-logo.png"
+            width="30"
+            height="30"
+            className="d-inline-block align-top me-2"
+          />
+          Food Saviour
+        </Navbar.Brand>
         {user ? (
           <>
-            <div className="d-flex align-items-center">
-              <button
-                className="btn btn-outline-primary me-2"
-                type="button"
-                onClick={() => navigate("/dashboard")}
-              >
-                Dashboard
-              </button>
-              <button
-                className="btn btn-outline-danger me-2"
-                type="button"
-                onClick={Logout}
-              >
-                Log Out
-              </button>
-            </div>
+            <Nav className="me-auto">
+              <Nav.Link href="#dashboard">Dashboard</Nav.Link>
+            </Nav>
+            <Navbar.Text onClick={Logout} style={{ cursor: "pointer" }}>
+              Logout
+            </Navbar.Text>
           </>
         ) : (
-          <button
-            className="btn btn-outline-success"
-            type="button"
-            onClick={() => navigate("/login")}
-          >
+          <Button variant="outline-success" onClick={() => navigate("/login")}>
             Sign In
-          </button>
+          </Button>
         )}
       </Container>
     </Navbar>

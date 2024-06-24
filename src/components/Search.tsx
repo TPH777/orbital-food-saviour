@@ -1,8 +1,8 @@
-export const Search = ({ setQuery }: { setQuery: Function }) => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value); // Pass the name back to the parent component
-  };
-
+export const Search = ({
+  setQuery,
+}: {
+  setQuery: React.Dispatch<React.SetStateAction<string>>;
+}) => {
   return (
     <div className="wrap">
       <div className="search">
@@ -10,7 +10,9 @@ export const Search = ({ setQuery }: { setQuery: Function }) => {
           type="text"
           className="searchTerm"
           placeholder="What are you looking for?"
-          onChange={handleChange}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setQuery(e.target.value)
+          }
         />
       </div>
     </div>

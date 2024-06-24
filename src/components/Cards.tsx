@@ -1,4 +1,6 @@
 import { Button, Card, Col, Row } from "react-bootstrap";
+import { FoodItem } from "../interface/FoodItem";
+import { timestampToDate } from "../functions/Date";
 
 export const Cards = ({
   user,
@@ -7,7 +9,7 @@ export const Cards = ({
   deleteFood,
 }: {
   user: any;
-  foodList: any[];
+  foodList: FoodItem[];
   updateFood: Function;
   deleteFood: Function;
 }) => {
@@ -16,10 +18,14 @@ export const Cards = ({
       {foodList && foodList.length > 0 ? (
         <Row md={4} className="g-4">
           {foodList.map(
-            (food) =>
+            (food, index) =>
               food.userId == user.uid && (
-                <Col key={food.id}>
-                  <Card style={{ width: "18rem" }} key={food}>
+                <Col key={index}>
+                  <Card
+                    style={{ width: "18rem" }}
+                    key={food.id}
+                    bg={food.post ? "success" : "secondary"}
+                  >
                     <Card.Img
                       className="card-img-top"
                       variant="top"
@@ -28,10 +34,17 @@ export const Cards = ({
                     <Card.Body>
                       <Card.Title>{food.name}</Card.Title>
                       <Card.Subtitle>${food.price}</Card.Subtitle>
+                      <Card.Text>
+                        {food.date
+                          ? `Date: ${timestampToDate(food.date)
+                              .toString()
+                              .slice(0, -38)}`
+                          : "No Date"}
+                      </Card.Text>
                       <br />
                       <Button
                         onClick={() => updateFood(food.id)}
-                        variant="secondary"
+                        variant="warning"
                       >
                         Edit
                       </Button>

@@ -1,44 +1,41 @@
 import { useEffect, useState } from "react";
-import swal from "sweetalert";
 
 import { auth, db } from "../config/firebase";
 import {
   doc,
-  getDocs,
-  collection,
   deleteDoc,
   getDoc,
+  getDocs,
+  collection,
 } from "firebase/firestore";
 
-import ErrorText from "../components/ErrorText";
 import { Cards } from "../components/Cards";
 import { Edit } from "../components/Edit";
 import { Add } from "../components/Add";
 import { deleteObject, getStorage, ref } from "firebase/storage";
 import { Search } from "../components/Search";
+import { FoodItem } from "../interface/FoodItem";
+import { deleteSuccess, deleteWarning } from "../functions/Alert";
 
 export function Dashboard() {
   const user = auth.currentUser;
-
-  const [error, setError] = useState<string>("");
-  const [isAdding, setIsAdding] = useState(false);
-  const [selectedFoodId, setSelectedFoodId] = useState<any>();
-  const [isEditing, setIsEditing] = useState(false);
-
-  const [foodList, setFoodList] = useState<any[]>([]);
-  const [query, setQuery] = useState<string>("");
-  const foodCollectionRef = collection(db, "food");
+  const [isAdding, setIsAdding] = useState<boolean>(false);
+  const [selectedFoodId, setSelectedFoodId] = useState<string>("");
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [foodList, setFoodList] = useState<FoodItem[]>([]);
+  const [search, setSearch] = useState<string>("");
 
   const getFoodList = async () => {
     try {
-      const data = await getDocs(foodCollectionRef);
+      const data = await getDocs(collection(db, "food"));
       const filteredData = data.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
-      }));
+      })) as FoodItem[];
       setFoodList(filteredData);
+      console.log("called");
     } catch (error) {
-      setError("get failed");
+      console.log(error);
     }
   };
 
@@ -47,33 +44,21 @@ export function Dashboard() {
   }, []);
 
   const deleteFood = async (id: string) => {
-    swal({
-      icon: "warning",
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      buttons: [true, true],
-    }).then(async (result: boolean) => {
-      if (result) {
-        try {
-          const foodDoc = doc(db, "food", id);
-          const data = (await getDoc(foodDoc)).data();
-          if (data !== undefined) {
-            deleteObject(ref(getStorage(), data.imagePath));
-          }
-          deleteDoc(foodDoc);
-          swal({
-            icon: "success",
-            title: "Deleted!",
-            text: `Data has been deleted.`,
-            buttons: [false],
-            timer: 1000,
-          });
+    const confirm = await deleteWarning();
+    if (confirm) {
+      try {
+        const foodDoc = doc(db, "food", id);
+        const data = (await getDoc(foodDoc)).data();
+        if (data !== undefined) {
+          await deleteObject(ref(getStorage(), data.imagePath));
+          await deleteDoc(foodDoc);
           getFoodList();
-        } catch (error) {
-          console.log(error);
+          deleteSuccess(data.name);
         }
+      } catch (error) {
+        console.log(error);
       }
-    });
+    }
   };
 
   const updateFood = async (id: string) => {
@@ -82,7 +67,7 @@ export function Dashboard() {
   };
 
   const searchFoodList = foodList.filter((food) =>
-    food.name.toLowerCase().includes(query.toLowerCase())
+    food.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -101,7 +86,7 @@ export function Dashboard() {
             </button>
           </div>
           <br />
-          <Search setQuery={(query: string) => setQuery(query)} />
+          <Search setQuery={setSearch} />
           <br />
           <Cards
             user={user}
@@ -112,7 +97,9 @@ export function Dashboard() {
         </>
       )}
 
-      {isAdding && <Add getFoodList={getFoodList} setIsAdding={setIsAdding} />}
+      {isAdding && (
+        <Add user={user} getFoodList={getFoodList} setIsAdding={setIsAdding} />
+      )}
 
       {isEditing && (
         <Edit
@@ -122,7 +109,6 @@ export function Dashboard() {
           setIsEditing={setIsEditing}
         />
       )}
-      <ErrorText error={error} />
     </>
   );
 }

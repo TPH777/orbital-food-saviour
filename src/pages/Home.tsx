@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
-import { db } from "../config/firebase";
-import { getDocs, collection } from "firebase/firestore";
 import Card from "react-bootstrap/Card";
 import { Col, Row } from "react-bootstrap";
 import { Search } from "../components/Search";
+import { FoodItem } from "../interface/FoodItem";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../config/firebase";
+import { timestampToDate } from "../functions/Date";
 
 export function Home() {
-  const [foodList, setFoodList] = useState<any[]>([]);
+  const [foodList, setFoodList] = useState<FoodItem[]>([]);
   const [query, setQuery] = useState<string>("");
-  const foodCollectionRef = collection(db, "food");
 
   const getFoodList = async () => {
     try {
-      const data = await getDocs(foodCollectionRef);
+      const data = await getDocs(collection(db, "food"));
       const filteredData = data.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
-      }));
+      })) as FoodItem[];
       setFoodList(filteredData);
+      console.log("called");
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   };
 
@@ -27,24 +29,33 @@ export function Home() {
     getFoodList();
   }, []);
 
-  const searchFoodList = foodList.filter((food) =>
-    food.name.toLowerCase().includes(query.toLowerCase())
+  const searchFoodList = foodList.filter(
+    (food) =>
+      food.post === true &&
+      food.name.toLowerCase().includes(query.toLowerCase())
   );
 
   return (
     <>
-      <Search setQuery={(query: string) => setQuery(query)} />
+      <Search setQuery={setQuery} />
       <br />
 
       {searchFoodList && searchFoodList.length > 0 ? (
         <Row md={4} className="g-4">
-          {searchFoodList.map((food) => (
-            <Col key={food.id}>
-              <Card style={{ width: "18rem" }} key={food}>
+          {searchFoodList.map((food, index) => (
+            <Col key={index}>
+              <Card style={{ width: "18rem" }} key={food.id}>
                 <Card.Img variant="top" src={food.imageURL} />
                 <Card.Body>
                   <Card.Title>{food.name}</Card.Title>
                   <Card.Subtitle>${food.price}</Card.Subtitle>
+                  <Card.Text>
+                    {food.date
+                      ? `Date: ${timestampToDate(food.date)
+                          .toString()
+                          .slice(0, -38)}`
+                      : "No Date"}
+                  </Card.Text>
                   <br />
                   <Card.Text>Prepared by: {food.business}</Card.Text>
                 </Card.Body>

@@ -1,24 +1,31 @@
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import swal from "sweetalert";
-import { db, storage } from "../config/firebase";
 import { useState } from "react";
+import { CrudForm } from "./CrudForm";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db, storage } from "../config/firebase";
 import { ref, uploadBytes } from "firebase/storage";
+import { invalidInputWarning, updateSuccess } from "../functions/Alert";
+import { FoodItem } from "../interface/FoodItem";
+import { timestampToDate } from "../functions/Date";
+
+interface EditProps {
+  foodList: FoodItem[];
+  selectedFoodId: string;
+  getFoodList: Function;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
 export const Edit = ({
   foodList,
   selectedFoodId,
   getFoodList,
   setIsEditing,
-}: {
-  foodList: any;
-  selectedFoodId: string;
-  getFoodList: Function;
-  setIsEditing: Function;
-}) => {
+}: EditProps) => {
   const [food] = foodList.filter((food: any) => food.id === selectedFoodId);
-  const [name, setName] = useState(food.name);
-  const [price, setPrice] = useState(food.price);
+  const [name, setName] = useState<string>(food.name);
+  const [price, setPrice] = useState<number>(food.price);
   const [image, setImage] = useState<File>();
+  const [post, setPost] = useState<boolean>(food.post);
+  const [date, setDate] = useState<Date>(timestampToDate(food.date));
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -29,34 +36,11 @@ export const Edit = ({
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (price <= 0) {
-      // Invalid input
-      return swal({
-        icon: "error",
-        title: "Error!",
-        text: "Price must be greater than 0",
-      });
-    }
-
-    if (!name || !price) {
-      // Empty Input
-      return swal({
-        icon: "error",
-        title: "Error!",
-        text: "All fields are required.",
-      });
+    if (invalidInputWarning(name, price, image, date, false)) {
+      return;
     }
 
     if (image) {
-      const imageExt = image.type.split("/")[1]; // Invalid file type
-      if (imageExt !== "jpeg" && imageExt !== "jpg" && imageExt !== "png") {
-        return swal({
-          icon: "error",
-          title: "Error!",
-          text: "Invalid image, file extension must be .jpeg, .jpg or .png",
-        });
-      }
-
       const foodDoc = doc(db, "food", selectedFoodId);
       const data = (await getDoc(foodDoc)).data();
       if (data) {
@@ -73,16 +57,12 @@ export const Edit = ({
       await updateDoc(doc(db, "food", selectedFoodId), {
         name: name,
         price: price,
+        post: post,
+        date: date,
       });
       setIsEditing(false);
       getFoodList();
-      await swal({
-        icon: "success",
-        title: "Updated!",
-        text: `${name} has been updated.`,
-        timer: 1200,
-        buttons: [false],
-      });
+      updateSuccess(name);
       if (image) {
         // To refresh image
         window.location.reload();
@@ -93,47 +73,19 @@ export const Edit = ({
   };
 
   return (
-    <form onSubmit={handleUpdate}>
-      <h2>Update Food</h2>
-      <div className="form-outline mb-4">
-        <label>Name</label>
-        <input
-          id="name"
-          type="text"
-          name="name"
-          value={name}
-          className="form-control"
-          onChange={(e) => setName(e.target.value)}
-        />
-      </div>
-      <div className="form-outline mb-4">
-        <label>Price</label>
-        <input
-          id="price"
-          type="number"
-          name="price"
-          value={price}
-          className="form-control"
-          onChange={(e) => setPrice(Number(e.target.value))}
-        />
-      </div>
-      <label>Image</label>
-      <div className="input-group mb-3">
-        <input
-          type="file"
-          className="form-control"
-          id="image"
-          onChange={handleImage}
-        />
-      </div>
-      <input className="btn btn-primary mb-4" type="submit" value="Update" />
-      <input
-        style={{ marginLeft: "12px" }}
-        className="btn btn-danger mb-4"
-        type="button"
-        value="Cancel"
-        onClick={() => setIsEditing(false)}
-      />
-    </form>
+    <CrudForm
+      add={false}
+      name={name}
+      price={price}
+      post={post}
+      date={date}
+      setName={setName}
+      setPrice={setPrice}
+      setPost={setPost}
+      setDate={setDate}
+      handleForm={handleUpdate}
+      handleImage={handleImage}
+      setInProgress={setIsEditing}
+    />
   );
 };
