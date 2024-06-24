@@ -48,9 +48,10 @@ export function invalidInputWarning(
   price: number,
   image: any,
   date: Date,
+  post: boolean,
   add: boolean
 ) {
-  if (!name || !price || (add && !image)) {
+  if (!name || !price || (add && (!image || !date))) {
     // Empty Input
     swal({
       icon: "error",
@@ -66,12 +67,12 @@ export function invalidInputWarning(
       text: "Price must be greater than 0",
     });
     return true;
-  } else if (date < new Date()) {
+  } else if (post && date < new Date()) {
     // Invalid Date
     swal({
       icon: "error",
       title: "Error!",
-      text: "Selected date must be after current time",
+      text: "Date must be after current time to post",
     });
     return true;
   } else {

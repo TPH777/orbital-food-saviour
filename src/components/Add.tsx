@@ -28,7 +28,7 @@ export const Add = ({ user, getFoodList, setIsAdding }: AddProps) => {
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // To prevent the default form submission to trigger a full page reload
 
-    if (invalidInputWarning(name, price, image, date, true)) {
+    if (invalidInputWarning(name, price, image, date, post, true)) {
       return;
     }
 

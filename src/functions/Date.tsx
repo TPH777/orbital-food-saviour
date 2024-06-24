@@ -4,9 +4,5 @@ export function toLocalTime(date: Date) {
 }
 
 export function timestampToDate(timestamp: any) {
-  // Convert Firebase Timestamp to milliseconds
-  const milliseconds =
-    timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
-  // Create a new Date object
-  return new Date(milliseconds);
+  return new Date(timestamp.toDate());
 }

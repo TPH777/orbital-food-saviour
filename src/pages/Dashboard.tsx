@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { auth, db } from "../config/firebase";
-import {
-  doc,
-  deleteDoc,
-  getDoc,
-  getDocs,
-  collection,
-} from "firebase/firestore";
+import { doc, deleteDoc, getDoc } from "firebase/firestore";
 
 import { Cards } from "../components/Cards";
 import { Edit } from "../components/Edit";
@@ -16,6 +10,7 @@ import { deleteObject, getStorage, ref } from "firebase/storage";
 import { Search } from "../components/Search";
 import { FoodItem } from "../interface/FoodItem";
 import { deleteSuccess, deleteWarning } from "../functions/Alert";
+import { getFoodList } from "../functions/Get";
 
 export function Dashboard() {
   const user = auth.currentUser;
@@ -25,21 +20,18 @@ export function Dashboard() {
   const [foodList, setFoodList] = useState<FoodItem[]>([]);
   const [search, setSearch] = useState<string>("");
 
-  const getFoodList = async () => {
+  // To set food list
+  const fetchFoodList = async () => {
     try {
-      const data = await getDocs(collection(db, "food"));
-      const filteredData = data.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      })) as FoodItem[];
-      setFoodList(filteredData);
+      const updatedFoodList = await getFoodList();
+      setFoodList(updatedFoodList);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching food items:", error);
     }
   };
 
   useEffect(() => {
-    getFoodList();
+    fetchFoodList();
   }, []);
 
   const deleteFood = async (id: string) => {
@@ -97,14 +89,18 @@ export function Dashboard() {
       )}
 
       {isAdding && (
-        <Add user={user} getFoodList={getFoodList} setIsAdding={setIsAdding} />
+        <Add
+          user={user}
+          getFoodList={fetchFoodList}
+          setIsAdding={setIsAdding}
+        />
       )}
 
       {isEditing && (
         <Edit
           foodList={foodList}
           selectedFoodId={selectedFoodId}
-          getFoodList={getFoodList}
+          getFoodList={fetchFoodList}
           setIsEditing={setIsEditing}
         />
       )}

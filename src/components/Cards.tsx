@@ -41,7 +41,6 @@ export const Cards = ({
                               .slice(0, -38)}`
                           : "No Date"}
                       </Card.Text>
-                      <br />
                       <Button
                         onClick={() => updateFood(food.id)}
                         variant="warning"

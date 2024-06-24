@@ -3,29 +3,24 @@ import Card from "react-bootstrap/Card";
 import { Col, Row } from "react-bootstrap";
 import { Search } from "../components/Search";
 import { FoodItem } from "../interface/FoodItem";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../config/firebase";
 import { timestampToDate } from "../functions/Date";
+import { getFoodList } from "../functions/Get";
 
 export function Home() {
   const [foodList, setFoodList] = useState<FoodItem[]>([]);
   const [query, setQuery] = useState<string>("");
 
-  const getFoodList = async () => {
+  const fetchFoodList = async () => {
     try {
-      const data = await getDocs(collection(db, "food"));
-      const filteredData = data.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      })) as FoodItem[];
-      setFoodList(filteredData);
+      const updatedFoodList = await getFoodList();
+      setFoodList(updatedFoodList);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching food items:", error);
     }
   };
 
   useEffect(() => {
-    getFoodList();
+    fetchFoodList();
   }, []);
 
   const searchFoodList = foodList.filter(

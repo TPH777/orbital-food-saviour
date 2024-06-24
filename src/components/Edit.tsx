@@ -20,7 +20,10 @@ export const Edit = ({
   getFoodList,
   setIsEditing,
 }: EditProps) => {
-  const [food] = foodList.filter((food: any) => food.id === selectedFoodId);
+  const food = foodList.find((food: any) => food.id === selectedFoodId);
+  if (!food) {
+    return null;
+  }
   const [name, setName] = useState<string>(food.name);
   const [price, setPrice] = useState<number>(food.price);
   const [image, setImage] = useState<File>();
@@ -36,7 +39,7 @@ export const Edit = ({
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (invalidInputWarning(name, price, image, date, false)) {
+    if (invalidInputWarning(name, price, image, date, post, false)) {
       return;
     }
 
@@ -61,8 +64,8 @@ export const Edit = ({
         date: date,
       });
       setIsEditing(false);
-      getFoodList();
       updateSuccess(name);
+      getFoodList();
       if (image) {
         // To refresh image
         window.location.reload();
