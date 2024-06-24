@@ -19,7 +19,6 @@ export function Home() {
         id: doc.id,
       })) as FoodItem[];
       setFoodList(filteredData);
-      console.log("called");
     } catch (error) {
       console.log(error);
     }

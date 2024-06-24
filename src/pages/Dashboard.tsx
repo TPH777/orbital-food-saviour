@@ -33,7 +33,6 @@ export function Dashboard() {
         id: doc.id,
       })) as FoodItem[];
       setFoodList(filteredData);
-      console.log("called");
     } catch (error) {
       console.log(error);
     }
@@ -52,7 +51,7 @@ export function Dashboard() {
         if (data !== undefined) {
           await deleteObject(ref(getStorage(), data.imagePath));
           await deleteDoc(foodDoc);
-          getFoodList();
+          setFoodList(foodList.filter((food) => food.id !== id));
           deleteSuccess(data.name);
         }
       } catch (error) {
