@@ -49,6 +49,7 @@ export function invalidInputWarning(
   image: any,
   date: Date,
   post: boolean,
+  cuisine: string,
   add: boolean
 ) {
   if (!name || !price || (add && (!image || !date))) {
@@ -73,6 +74,14 @@ export function invalidInputWarning(
       icon: "error",
       title: "Error!",
       text: "Date must be after current time to post",
+    });
+    return true;
+  } else if (cuisine === "Cuisine") {
+    // Did not select cuisine
+    swal({
+      icon: "error",
+      title: "Error!",
+      text: "Select a cuisine",
     });
     return true;
   } else {

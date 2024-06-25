@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-
 import { auth, db } from "../config/firebase";
 import { doc, deleteDoc, getDoc } from "firebase/firestore";
-
 import { Cards } from "../components/Cards";
 import { Edit } from "../components/Edit";
 import { Add } from "../components/Add";

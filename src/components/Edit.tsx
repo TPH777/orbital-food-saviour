@@ -29,6 +29,7 @@ export const Edit = ({
   const [image, setImage] = useState<File>();
   const [post, setPost] = useState<boolean>(food.post);
   const [date, setDate] = useState<Date>(timestampToDate(food.date));
+  const [cuisine, setCuisine] = useState<string>(food.cuisine);
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -39,7 +40,7 @@ export const Edit = ({
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (invalidInputWarning(name, price, image, date, post, false)) {
+    if (invalidInputWarning(name, price, image, date, post, cuisine, false)) {
       return;
     }
 
@@ -62,6 +63,7 @@ export const Edit = ({
         price: price,
         post: post,
         date: date,
+        cuisine: cuisine,
       });
       setIsEditing(false);
       updateSuccess(name);
@@ -82,10 +84,12 @@ export const Edit = ({
       price={price}
       post={post}
       date={date}
+      cuisine={cuisine}
       setName={setName}
       setPrice={setPrice}
       setPost={setPost}
       setDate={setDate}
+      setCuisine={setCuisine}
       handleForm={handleUpdate}
       handleImage={handleImage}
       setInProgress={setIsEditing}

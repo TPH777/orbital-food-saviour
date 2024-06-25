@@ -18,6 +18,7 @@ export const Add = ({ user, getFoodList, setIsAdding }: AddProps) => {
   const [image, setImage] = useState<any>();
   const [post, setPost] = useState<boolean>(false);
   const [date, setDate] = useState<Date>(new Date());
+  const [cuisine, setCuisine] = useState<string>("Cuisine");
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -28,7 +29,7 @@ export const Add = ({ user, getFoodList, setIsAdding }: AddProps) => {
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // To prevent the default form submission to trigger a full page reload
 
-    if (invalidInputWarning(name, price, image, date, post, true)) {
+    if (invalidInputWarning(name, price, image, date, post, cuisine, true)) {
       return;
     }
 
@@ -53,6 +54,7 @@ export const Add = ({ user, getFoodList, setIsAdding }: AddProps) => {
           business: user.displayName,
           imageURL: imageURL,
           imagePath: imagePath,
+          cuisine: cuisine,
         });
         setIsAdding(false);
         getFoodList();
@@ -68,10 +70,12 @@ export const Add = ({ user, getFoodList, setIsAdding }: AddProps) => {
       price={0}
       date={date}
       post={post}
+      cuisine={cuisine}
       setName={setName}
       setPrice={setPrice}
       setPost={setPost}
       setDate={setDate}
+      setCuisine={setCuisine}
       handleForm={handleAdd}
       handleImage={handleImage}
       setInProgress={setIsAdding}
