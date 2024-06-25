@@ -8,7 +8,8 @@ import { getFoodList } from "../functions/Get";
 
 export function Home() {
   const [foodList, setFoodList] = useState<FoodItem[]>([]);
-  const [query, setQuery] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
+  const [cuisine, setCuisine] = useState<string>("All");
 
   const fetchFoodList = async () => {
     try {
@@ -23,16 +24,20 @@ export function Home() {
     fetchFoodList();
   }, []);
 
-  const searchFoodList = foodList.filter(
-    (food) =>
-      food.post === true &&
-      food.name.toLowerCase().includes(query.toLowerCase())
-  );
+  const searchFoodList = foodList.filter((food) => {
+    const nameMatches = food.name.toLowerCase().includes(search.toLowerCase());
+    const cuisineMatches = cuisine === "All" || food.cuisine === cuisine;
+    return nameMatches && cuisineMatches;
+  });
 
   return (
     <>
-      <Search setQuery={setQuery} />
-      <br />
+      <Search
+        search={search}
+        cuisine={cuisine}
+        setSearch={setSearch}
+        setCuisine={setCuisine}
+      />
 
       {searchFoodList && searchFoodList.length > 0 ? (
         <Row md={4} className="g-4">

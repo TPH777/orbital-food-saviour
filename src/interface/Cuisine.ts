@@ -1,11 +1,11 @@
 export const cuisineTypes = [
-    "Pastries",
     "Chinese",
     "Indian",
     "Japanese",
     "Korean",
     "Malay",
-    "Middle Eastern",
+    "Middle East",
+    "Pastries",
     "Thai",
     "Western",
     "Others"

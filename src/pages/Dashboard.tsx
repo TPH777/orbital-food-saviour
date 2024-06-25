@@ -17,6 +17,7 @@ export function Dashboard() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [foodList, setFoodList] = useState<FoodItem[]>([]);
   const [search, setSearch] = useState<string>("");
+  const [cuisine, setCuisine] = useState<string>("All");
 
   // To set food list
   const fetchFoodList = async () => {
@@ -55,9 +56,11 @@ export function Dashboard() {
     setIsEditing(true);
   };
 
-  const searchFoodList = foodList.filter((food) =>
-    food.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const searchFoodList = foodList.filter((food) => {
+    const nameMatches = food.name.toLowerCase().includes(search.toLowerCase());
+    const cuisineMatches = cuisine === "All" || food.cuisine === cuisine;
+    return nameMatches && cuisineMatches;
+  });
 
   return (
     <>
@@ -65,7 +68,7 @@ export function Dashboard() {
       <br />
       {!isAdding && !isEditing && (
         <>
-          <div className="d-grid gap-2">
+          <div className="d-grid gap-2 mb-4">
             <button
               type="button"
               className="btn btn-primary btn-block"
@@ -74,9 +77,14 @@ export function Dashboard() {
               Add new food
             </button>
           </div>
-          <br />
-          <Search setQuery={setSearch} />
-          <br />
+
+          <Search
+            search={search}
+            cuisine={cuisine}
+            setSearch={setSearch}
+            setCuisine={setCuisine}
+          />
+
           <Cards
             user={user}
             foodList={searchFoodList}
