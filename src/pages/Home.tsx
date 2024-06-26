@@ -3,7 +3,7 @@ import Card from "react-bootstrap/Card";
 import { Badge, Button, Col, Row } from "react-bootstrap";
 import { Search } from "../components/Search";
 import { FoodItem } from "../interface/FoodItem";
-import { timestampToDate } from "../functions/Date";
+import { timestampToString } from "../functions/Date";
 import { getFoodList } from "../functions/Get";
 
 export function Home() {
@@ -81,9 +81,7 @@ export function Home() {
                   <Card.Subtitle>${food.price}</Card.Subtitle>
                   <Card.Text>
                     {food.date
-                      ? `Date: ${timestampToDate(food.date)
-                          .toString()
-                          .slice(0, -38)}`
+                      ? `Date: ${timestampToString(food.date)}`
                       : "No Date"}
                   </Card.Text>
                   <Badge

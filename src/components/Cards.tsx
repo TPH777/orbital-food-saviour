@@ -1,6 +1,6 @@
 import { Badge, Button, Card, Col, Row } from "react-bootstrap";
 import { FoodItem } from "../interface/FoodItem";
-import { timestampToDate } from "../functions/Date";
+import { timestampToString } from "../functions/Date";
 
 export const Cards = ({
   user,
@@ -36,9 +36,7 @@ export const Cards = ({
                       <Card.Subtitle>${food.price}</Card.Subtitle>
                       <Card.Text>
                         {food.date
-                          ? `Date: ${timestampToDate(food.date)
-                              .toString()
-                              .slice(0, -38)}`
+                          ? `Date: ${timestampToString(food.date)}`
                           : "No Date"}
                       </Card.Text>
                       <div className="float-end">
