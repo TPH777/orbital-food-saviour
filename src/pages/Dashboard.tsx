@@ -9,6 +9,7 @@ import { Search } from "../components/Search";
 import { FoodItem } from "../interface/FoodItem";
 import { deleteSuccess, deleteWarning } from "../functions/Alert";
 import { getFoodList } from "../functions/Get";
+import { Spinner } from "react-bootstrap";
 
 export function Dashboard() {
   const user = auth.currentUser;
@@ -19,12 +20,15 @@ export function Dashboard() {
   const [search, setSearch] = useState<string>("");
   const [cuisine, setCuisine] = useState<string>("~Cuisine~");
   const [sort, setSort] = useState<string>("~Sort~");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // To set food list
   const fetchFoodList = async () => {
     try {
+      setIsLoading(true);
       const updatedFoodList = await getFoodList();
       setFoodList(updatedFoodList);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching food items:", error);
     }
@@ -77,10 +81,14 @@ export function Dashboard() {
   });
   return (
     <>
-      <h1>{user?.displayName}'s Dashboard</h1>
-      <br />
-      {!isAdding && !isEditing && (
+      {isLoading && (
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      )}
+      {!isLoading && !isAdding && !isEditing && (
         <>
+          <h1 className="mb-4">{user?.displayName}'s Dashboard</h1>
           <div className="d-grid gap-2 mb-4">
             <button
               type="button"

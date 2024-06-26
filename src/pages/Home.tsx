@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Card from "react-bootstrap/Card";
-import { Badge, Button, Col, Row } from "react-bootstrap";
+import { Badge, Button, Col, Row, Spinner } from "react-bootstrap";
 import { Search } from "../components/Search";
 import { FoodItem } from "../interface/FoodItem";
 import { timestampToString } from "../functions/Date";
@@ -12,15 +12,18 @@ export function Home() {
   const [cuisine, setCuisine] = useState<string>("~Cuisine~");
   const [sort, setSort] = useState<string>("~Sort~");
   const [business, setBusiness] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchFoodList = async () => {
     try {
+      setIsLoading(true);
       const updatedFoodList = await getFoodList();
       const postedFoodList = updatedFoodList.filter((food) => {
         // Display posted food items only
         return food.post === true;
       });
       setFoodList(postedFoodList);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching food items:", error);
     }
@@ -70,7 +73,13 @@ export function Home() {
         Showing {business}'s results only, Click to Return
       </Button>
 
-      {searchFoodList && searchFoodList.length > 0 ? (
+      {isLoading && (
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      )}
+
+      {!isLoading && (
         <Row md={4} className="g-4">
           {searchFoodList.map((food, index) => (
             <Col key={index}>
@@ -107,8 +116,10 @@ export function Home() {
             </Col>
           ))}
         </Row>
-      ) : (
-        <h1>No Results</h1>
+      )}
+
+      {!isLoading && searchFoodList.length == 0 && (
+        <h1 className="mt-3">No Results</h1>
       )}
     </>
   );
