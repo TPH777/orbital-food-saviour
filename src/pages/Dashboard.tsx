@@ -17,7 +17,8 @@ export function Dashboard() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [foodList, setFoodList] = useState<FoodItem[]>([]);
   const [search, setSearch] = useState<string>("");
-  const [cuisine, setCuisine] = useState<string>("All");
+  const [cuisine, setCuisine] = useState<string>("~Cuisine~");
+  const [sort, setSort] = useState<string>("~Sort~");
 
   // To set food list
   const fetchFoodList = async () => {
@@ -57,11 +58,23 @@ export function Dashboard() {
   };
 
   const searchFoodList = foodList.filter((food) => {
-    const nameMatches = food.name.toLowerCase().includes(search.toLowerCase());
-    const cuisineMatches = cuisine === "All" || food.cuisine === cuisine;
+    const nameMatches = food.name.toLowerCase().includes(search.toLowerCase()); // Search
+    const cuisineMatches = cuisine === "~Cuisine~" || food.cuisine === cuisine; // Filter
     return nameMatches && cuisineMatches;
   });
 
+  searchFoodList.sort((a, b) => {
+    // Sort
+    if (sort === "Date") {
+      return a.date > b.date ? 1 : -1;
+    } else if (sort === "Price") {
+      return a.price > b.price ? 1 : -1;
+    } else if (sort === "Cuisine") {
+      return a.cuisine > b.cuisine ? 1 : -1;
+    } else {
+      return a.name > b.name ? 1 : -1; // Default by name
+    }
+  });
   return (
     <>
       <h1>{user?.displayName}'s Dashboard</h1>
@@ -81,8 +94,10 @@ export function Dashboard() {
           <Search
             search={search}
             cuisine={cuisine}
+            sort={sort}
             setSearch={setSearch}
             setCuisine={setCuisine}
+            setSort={setSort}
           />
 
           <Cards

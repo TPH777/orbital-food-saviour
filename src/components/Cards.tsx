@@ -1,4 +1,4 @@
-import { Button, Card, Col, Row } from "react-bootstrap";
+import { Badge, Button, Card, Col, Row } from "react-bootstrap";
 import { FoodItem } from "../interface/FoodItem";
 import { timestampToDate } from "../functions/Date";
 
@@ -22,7 +22,7 @@ export const Cards = ({
               food.userId == user.uid && (
                 <Col key={index}>
                   <Card
-                    style={{ width: "18rem" }}
+                    style={{ width: "19rem" }}
                     key={food.id}
                     bg={food.post ? "success" : "secondary"}
                   >
@@ -41,19 +41,24 @@ export const Cards = ({
                               .slice(0, -38)}`
                           : "No Date"}
                       </Card.Text>
-                      <Button
-                        onClick={() => updateFood(food.id)}
-                        variant="warning"
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        onClick={() => deleteFood(food.id)}
-                        className="ms-2"
-                        variant="danger"
-                      >
-                        Delete
-                      </Button>
+                      <div className="float-end">
+                        <Button
+                          onClick={() => updateFood(food.id)}
+                          variant="warning"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          onClick={() => deleteFood(food.id)}
+                          className="ms-2"
+                          variant="danger"
+                        >
+                          Delete
+                        </Button>
+                        <Badge pill className="ms-2" bg="dark">
+                          {food.cuisine}
+                        </Badge>
+                      </div>
                     </Card.Body>
                   </Card>
                 </Col>
