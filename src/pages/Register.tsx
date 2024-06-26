@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ErrorText from "../components/ErrorText";
 import { auth } from "../config/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { ButtonGroup, ToggleButton } from "react-bootstrap";
 
 export const RegisterPage = () => {
   const [registering, setRegistering] = useState(false);
@@ -11,6 +12,7 @@ export const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+  const [user, setUser] = useState<boolean>(true);
 
   const navigate = useNavigate();
 
@@ -114,14 +116,37 @@ export const RegisterPage = () => {
           onChange={(e) => setConfirm(e.target.value)}
         />
       </div>
-
-      <button
-        disabled={registering}
-        type="submit"
-        className="btn btn-primary btn-block mb-4"
-      >
-        {registering ? "Registering..." : "Register"}
-      </button>
+      <div className="mb-4">
+        <ButtonGroup>
+          <ToggleButton
+            id="post-checked"
+            type="radio"
+            variant={"outline-success"}
+            value={1}
+            checked={user === true}
+            onChange={() => setUser(true)}
+          >
+            Consumer
+          </ToggleButton>
+          <ToggleButton
+            id="post-unchecked"
+            type="radio"
+            variant={"outline-dark"}
+            value={2}
+            checked={user === false}
+            onChange={() => setUser(false)}
+          >
+            Business
+          </ToggleButton>
+        </ButtonGroup>
+        <button
+          disabled={registering}
+          type="submit"
+          className="btn btn-primary btn-block ms-3"
+        >
+          {registering ? "Registering..." : "Register"}
+        </button>
+      </div>
 
       <small>
         <p className="m-1 text-center">

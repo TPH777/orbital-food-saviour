@@ -4,12 +4,14 @@ import ErrorText from "../components/ErrorText";
 import { auth, googleProvider } from "../config/firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import GoogleButton from "react-google-button";
+import { ButtonGroup, ToggleButton } from "react-bootstrap";
 
 export const LoginPage = () => {
   const [authenticating, setAuthenticating] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [user, setUser] = useState<boolean>(true);
 
   let navigate = useNavigate();
 
@@ -77,13 +79,37 @@ export const LoginPage = () => {
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={authenticating}
-        className="btn btn-primary ms-3"
-      >
-        {authenticating ? "Signing In..." : "Sign In"}
-      </button>
+      <div className="mb-4">
+        <ButtonGroup>
+          <ToggleButton
+            id="post-checked"
+            type="radio"
+            variant={"outline-success"}
+            value={1}
+            checked={user === true}
+            onChange={() => setUser(true)}
+          >
+            Consumer
+          </ToggleButton>
+          <ToggleButton
+            id="post-unchecked"
+            type="radio"
+            variant={"outline-dark"}
+            value={2}
+            checked={user === false}
+            onChange={() => setUser(false)}
+          >
+            Business
+          </ToggleButton>
+        </ButtonGroup>
+        <button
+          type="submit"
+          disabled={authenticating}
+          className="btn btn-primary ms-3"
+        >
+          {authenticating ? "Signing In..." : "Sign In"}
+        </button>
+      </div>
 
       <small>
         <p className="m-1 text-center">
