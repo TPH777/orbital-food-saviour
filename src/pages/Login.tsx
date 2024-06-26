@@ -6,43 +6,51 @@ import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import GoogleButton from "react-google-button";
 
 export const LoginPage = () => {
-  const [authenticating, setAuthenticating] = useState<boolean>(false);
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [authenticating, setAuthenticating] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   let navigate = useNavigate();
 
-  const defaultSignIn = () => {
+  const defaultSignIn = async (e: any) => {
+    e.preventDefault();
     setAuthenticating(true);
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        navigate("/dashboard");
-      })
-      .catch((error) => {
-        setAuthenticating(false);
-        if (error.code.includes("auth/invalid-credential")) {
-          setError("Invalid Credential");
-        } else if (error.code.includes("auth/invalid-email")) {
-          setError("Invalid Email.");
-        }
-      });
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/dashboard");
+    } catch (error) {
+      setAuthenticating(false);
+      setError(getErrorMessage(error));
+    }
   };
 
-  const googleSignIn = () => {
+  const googleSignIn = async () => {
     setAuthenticating(true);
-    signInWithPopup(auth, googleProvider)
-      .then(() => {
-        navigate("/dashboard");
-      })
-      .catch((error) => {
-        setAuthenticating(false);
-        setError(error.message);
-      });
+
+    try {
+      await signInWithPopup(auth, googleProvider);
+      navigate("/dashboard");
+    } catch (error: any) {
+      setAuthenticating(false);
+      setError(error.message);
+    }
+  };
+
+  const getErrorMessage = (error: any) => {
+    switch (error.code) {
+      case "auth/invalid-credential":
+        return "Invalid credentials. Please check your email and password.";
+      case "auth/invalid-email":
+        return "Invalid email address.";
+      default:
+        return error.message;
+    }
   };
 
   return (
-    <form>
+    <form onSubmit={defaultSignIn}>
       <div className="form-outline mb-4">
         <input
           type="email"
@@ -50,40 +58,44 @@ export const LoginPage = () => {
           id="email"
           placeholder="Email"
           className="form-control"
+          required
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
       </div>
 
       <div className="form-outline mb-4">
         <input
-          autoComplete="new-password"
           type="password"
           name="password"
           id="password"
           placeholder="Password"
           className="form-control"
-          onChange={(e) => setPassword(e.target.value)}
+          required
           value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
       </div>
 
       <button
+        type="submit"
         disabled={authenticating}
-        type="button"
-        className="btn btn-primary btn-block mb-4"
-        onClick={() => defaultSignIn()}
+        className="btn btn-primary ms-3"
       >
-        Sign In
+        {authenticating ? "Signing In..." : "Sign In"}
       </button>
+
       <small>
         <p className="m-1 text-center">
           Don't have an account? <Link to="/register">Register</Link>
         </p>
       </small>
+
       <ErrorText error={error} />
-      <p>
+
+      <div className="mt-3">
         <GoogleButton onClick={googleSignIn} />
-      </p>
+      </div>
     </form>
   );
 };

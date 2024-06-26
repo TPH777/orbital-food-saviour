@@ -5,69 +5,88 @@ import { auth } from "../config/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 export const RegisterPage = () => {
-  const [registering, setRegistering] = useState<boolean>(false);
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirm, setConfirm] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [registering, setRegistering] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
 
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
   const signUpWithEmailAndPassword = () => {
-    if (password !== confirm) {
-      setError("Please make sure your passwords match.");
+    if (!name || !email || !password || !confirm) {
+      setError("Please fill in all fields.");
       return;
     }
 
-    if (error !== "") setError("");
+    if (password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
 
+    setError("");
     setRegistering(true);
 
     createUserWithEmailAndPassword(auth, email, password)
-      .then((user) => {
-        updateProfile(user.user, {
-          displayName: name,
-        }).then(() => navigate("/dashboard"));
+      .then((userCredential) => {
+        const user = userCredential.user;
+        return updateProfile(user, { displayName: name });
+      })
+      .then(() => {
+        navigate("/dashboard");
       })
       .catch((error) => {
-        if (error.code.includes("auth/weak-password")) {
+        if (error.code === "auth/weak-password") {
           setError("Please enter a stronger password.");
-        } else if (error.code.includes("auth/email-already-in-use")) {
+        } else if (error.code === "auth/email-already-in-use") {
           setError("Email already in use.");
         } else {
-          setError("Invalid Email");
+          setError("Registration failed. Please try again.");
         }
-
+      })
+      .finally(() => {
         setRegistering(false);
       });
   };
 
   return (
-    <form>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        signUpWithEmailAndPassword();
+      }}
+    >
       <div className="form-outline mb-4">
+        <label>Name</label>
         <input
           type="text"
           name="name"
           id="name"
           placeholder="Name"
           className="form-control"
+          required
+          value={name}
           onChange={(e) => setName(e.target.value)}
         />
       </div>
 
       <div className="form-outline mb-4">
+        <label>Email</label>
         <input
           type="email"
           name="email"
           id="email"
           placeholder="Email"
           className="form-control"
+          required
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
       </div>
 
       <div className="form-outline mb-4">
+        <label>Password</label>
         <input
           autoComplete="new-password"
           type="password"
@@ -75,12 +94,14 @@ export const RegisterPage = () => {
           id="password"
           placeholder="Password"
           className="form-control"
-          onChange={(e) => setPassword(e.target.value)}
+          required
           value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
       </div>
 
       <div className="form-outline mb-4">
+        <label>Confirm Password</label>
         <input
           autoComplete="new-password"
           type="password"
@@ -88,24 +109,26 @@ export const RegisterPage = () => {
           id="confirm"
           placeholder="Confirm Password"
           className="form-control"
-          onChange={(e) => setConfirm(e.target.value)}
+          required
           value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
         />
       </div>
 
       <button
         disabled={registering}
-        type="button"
+        type="submit"
         className="btn btn-primary btn-block mb-4"
-        onClick={() => signUpWithEmailAndPassword()}
       >
-        Register
+        {registering ? "Registering..." : "Register"}
       </button>
+
       <small>
         <p className="m-1 text-center">
           Already have an account? <Link to="/login">Login.</Link>
         </p>
       </small>
+
       <ErrorText error={error} />
     </form>
   );
