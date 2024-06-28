@@ -22,7 +22,7 @@ export const Cards = ({
               food.userId == user.uid && (
                 <Col key={index}>
                   <Card
-                    style={{ width: "19rem" }}
+                    className="flex"
                     key={food.id}
                     bg={food.post ? "success" : "secondary"}
                   >

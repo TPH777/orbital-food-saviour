@@ -83,7 +83,7 @@ export function Home() {
         <Row md={4} className="g-4">
           {searchFoodList.map((food, index) => (
             <Col key={index}>
-              <Card style={{ width: "18rem" }} key={food.id}>
+              <Card className="flex" key={food.id}>
                 <Card.Img variant="top" src={food.imageURL} />
                 <Card.Body>
                   <Card.Title>{food.name}</Card.Title>

@@ -26,7 +26,7 @@ export const Search = ({
     <>
       <Form className="mb-4">
         <Row>
-          <Col xs={8}>
+          <Col className="flex">
             <Form.Control
               type="text"
               className="searchTerm"
