@@ -1,6 +1,6 @@
 #root {
   text-align: center;
-  background-image: url(".\pictures\background.jpg");
+  background-image: url("/pictures/background.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: repeat;

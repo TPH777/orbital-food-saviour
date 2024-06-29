@@ -34,7 +34,8 @@ export function NavBar() {
       <Container>
         <Navbar.Brand href="#">
           <img
-            src="src\pictures\food-saviour-logo.png"
+            src="/pictures/food-saviour-logo.png"
+            alt="logo"
             width="30"
             height="30"
             className="d-inline-block align-top me-2"
