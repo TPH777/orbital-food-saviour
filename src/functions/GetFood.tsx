@@ -1,7 +1,7 @@
 import { collection, getDocs, writeBatch } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { FoodItem } from "../interface/FoodItem";
-import { timestampToDate } from "../functions/Date";
+import { timestampToDate } from "./Date";
 
 export const getFoodList = async () => {
   try {

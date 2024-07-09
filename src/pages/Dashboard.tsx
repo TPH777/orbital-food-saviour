@@ -8,7 +8,7 @@ import { deleteObject, getStorage, ref } from "firebase/storage";
 import { Search } from "../components/Search";
 import { FoodItem } from "../interface/FoodItem";
 import { deleteSuccess, deleteWarning } from "../functions/Alert";
-import { getFoodList } from "../functions/Get";
+import { getFoodList } from "../functions/GetFood";
 import { Spinner } from "react-bootstrap";
 
 export function Dashboard() {

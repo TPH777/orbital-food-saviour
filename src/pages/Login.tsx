@@ -1,27 +1,24 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ErrorText from "../components/ErrorText";
-import { auth, googleProvider } from "../config/firebase";
+import { auth, db, googleProvider } from "../config/firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import GoogleButton from "react-google-button";
-import { ButtonGroup, ToggleButton } from "react-bootstrap";
+import { getErrorMessage } from "../functions/GetError";
+import { doc, setDoc } from "firebase/firestore";
 
 export const LoginPage = () => {
-  const [authenticating, setAuthenticating] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [user, setUser] = useState<boolean>(true);
+  const [authenticating, setAuthenticating] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   let navigate = useNavigate();
 
   const defaultSignIn = async (e: any) => {
     e.preventDefault();
     setAuthenticating(true);
-
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
     } catch (error) {
       setAuthenticating(false);
       setError(getErrorMessage(error));
@@ -30,25 +27,19 @@ export const LoginPage = () => {
 
   const googleSignIn = async () => {
     setAuthenticating(true);
-
-    try {
-      await signInWithPopup(auth, googleProvider);
-      navigate("/dashboard");
-    } catch (error: any) {
-      setAuthenticating(false);
-      setError(error.message);
-    }
-  };
-
-  const getErrorMessage = (error: any) => {
-    switch (error.code) {
-      case "auth/invalid-credential":
-        return "Invalid credentials. Please check your email and password.";
-      case "auth/invalid-email":
-        return "Invalid email address.";
-      default:
-        return error.message;
-    }
+    await signInWithPopup(auth, googleProvider)
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        if (!doc(db, "consumer", user.uid)) {
+          // Document don't exist (New user)
+          await setDoc(doc(db, "consumer", user.uid), {});
+        }
+        navigate("/");
+      })
+      .catch((error) => {
+        setAuthenticating(false);
+        setError(error.message);
+      });
   };
 
   return (
@@ -80,34 +71,27 @@ export const LoginPage = () => {
       </div>
 
       <div className="mb-4">
-        <ButtonGroup>
-          <ToggleButton
-            id="post-checked"
-            type="radio"
-            variant={"outline-success"}
-            value={1}
-            checked={user === true}
-            onChange={() => setUser(true)}
-          >
-            Consumer
-          </ToggleButton>
-          <ToggleButton
-            id="post-unchecked"
-            type="radio"
-            variant={"outline-dark"}
-            value={2}
-            checked={user === false}
-            onChange={() => setUser(false)}
-          >
-            Business
-          </ToggleButton>
-        </ButtonGroup>
         <button
           type="submit"
           disabled={authenticating}
-          className="btn btn-primary ms-3"
+          className="btn btn-primary ms-5 me-3"
         >
           {authenticating ? "Signing In..." : "Sign In"}
+        </button>
+        |
+        <button
+          onClick={googleSignIn}
+          disabled={authenticating}
+          className="btn btn-dark ms-3"
+        >
+          <img
+            src="/pictures/google-logo.png"
+            alt="logo"
+            width="30"
+            height="30"
+            className="d-inline-block align-top me-2"
+          />
+          {authenticating ? "Signing In..." : "Google Sign In (Consumer)"}
         </button>
       </div>
 
@@ -118,10 +102,6 @@ export const LoginPage = () => {
       </small>
 
       <ErrorText error={error} />
-
-      <div className="mt-3">
-        <GoogleButton onClick={googleSignIn} />
-      </div>
     </form>
   );
 };

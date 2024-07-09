@@ -1,17 +1,23 @@
 import { User, onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../config/firebase";
+import { auth, db } from "../config/firebase";
 import { useEffect, useState } from "react";
 import { Button, Container, Nav, Navbar } from "react-bootstrap";
+import { doc } from "firebase/firestore";
 
 export function NavBar() {
   let navigate = useNavigate();
-
   const [user, setUser] = useState<User>();
+  const [isConsumer, setIsConsumer] = useState<boolean>(false);
+
   const getUser = async () => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
+        if (doc(db, "consumer", user.uid)) {
+          // Consumer account
+          setIsConsumer(true);
+        }
       }
     });
   };
@@ -45,7 +51,11 @@ export function NavBar() {
         {user ? (
           <>
             <Nav className="me-auto">
-              <Nav.Link href="#dashboard">Dashboard</Nav.Link>
+              {isConsumer ? (
+                <Nav.Link href="#favorites">Favorites</Nav.Link>
+              ) : (
+                <Nav.Link href="#dashboard">Dashboard</Nav.Link>
+              )}
             </Nav>
             <Navbar.Text onClick={Logout} style={{ cursor: "pointer" }}>
               Logout

@@ -6,7 +6,7 @@ import { FoodItem } from "../interface/FoodItem";
 import { timestampToString } from "../functions/Date";
 import { getFoodList } from "../functions/GetFood";
 
-export function Home() {
+export function FavoritePage() {
   const [foodList, setFoodList] = useState<FoodItem[]>([]);
   const [search, setSearch] = useState<string>("");
   const [cuisine, setCuisine] = useState<string>("~Cuisine~");

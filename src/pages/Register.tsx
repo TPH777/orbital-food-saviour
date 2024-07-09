@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ErrorText from "../components/ErrorText";
-import { auth } from "../config/firebase";
+import { auth, db } from "../config/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
+import { doc, setDoc } from "firebase/firestore";
 
 export const RegisterPage = () => {
-  const [registering, setRegistering] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState("");
-  const [user, setUser] = useState<boolean>(true);
+  const [registering, setRegistering] = useState<boolean>(false);
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirm, setConfirm] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [isConsumer, setIsConsumer] = useState<boolean>(true);
 
   const navigate = useNavigate();
 
@@ -31,11 +32,15 @@ export const RegisterPage = () => {
     setRegistering(true);
 
     createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
         const user = userCredential.user;
+        if (isConsumer) {
+          // Adding user id as a document to the consumer collection
+          await setDoc(doc(db, "consumer", user.uid), {});
+        }
         return updateProfile(user, { displayName: name });
       })
-      .then(() => {
+      .then(async () => {
         navigate("/dashboard");
       })
       .catch((error) => {
@@ -123,8 +128,8 @@ export const RegisterPage = () => {
             type="radio"
             variant={"outline-success"}
             value={1}
-            checked={user === true}
-            onChange={() => setUser(true)}
+            checked={isConsumer === true}
+            onChange={() => setIsConsumer(true)}
           >
             Consumer
           </ToggleButton>
@@ -133,8 +138,8 @@ export const RegisterPage = () => {
             type="radio"
             variant={"outline-dark"}
             value={2}
-            checked={user === false}
-            onChange={() => setUser(false)}
+            checked={isConsumer === false}
+            onChange={() => setIsConsumer(false)}
           >
             Business
           </ToggleButton>
