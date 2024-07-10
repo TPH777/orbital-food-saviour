@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { auth, db } from "../config/firebase";
+import { db } from "../config/firebase";
 import { doc, deleteDoc, getDoc } from "firebase/firestore";
 import { Cards } from "../components/Cards";
 import { Edit } from "../components/Edit";
@@ -10,9 +10,16 @@ import { FoodItem } from "../interface/FoodItem";
 import { deleteSuccess, deleteWarning } from "../functions/Alert";
 import { getFoodList } from "../functions/GetFood";
 import { Spinner } from "react-bootstrap";
+import { useAuth } from "../context/Auth";
+import { useNavigate } from "react-router-dom";
 
 export function Dashboard() {
-  const user = auth.currentUser;
+  const user = useAuth().user;
+  let navigate = useNavigate();
+  if (!user) {
+    navigate("/login");
+  }
+
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [selectedFoodId, setSelectedFoodId] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -26,8 +33,7 @@ export function Dashboard() {
   const fetchFoodList = async () => {
     try {
       setIsLoading(true);
-      const updatedFoodList = await getFoodList();
-      setFoodList(updatedFoodList);
+      setFoodList(await getFoodList());
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching food items:", error);
@@ -109,7 +115,6 @@ export function Dashboard() {
           />
 
           <Cards
-            user={user}
             foodList={searchFoodList}
             updateFood={updateFood}
             deleteFood={deleteFood}
@@ -118,11 +123,7 @@ export function Dashboard() {
       )}
 
       {isAdding && (
-        <Add
-          user={user}
-          getFoodList={fetchFoodList}
-          setIsAdding={setIsAdding}
-        />
+        <Add getFoodList={fetchFoodList} setIsAdding={setIsAdding} />
       )}
 
       {isEditing && (

@@ -6,20 +6,23 @@ import { Layout } from "./Layout";
 import { RegisterPage } from "./pages/Register";
 import { Dashboard } from "./pages/Dashboard";
 import { FavoritePage } from "./pages/Favorites";
+import { AuthContextProvider } from "./context/Auth";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/favorites" element={<FavoritePage />} />
-        </Route>
-      </Routes>
-    </Router>
+    <AuthContextProvider>
+      <Router>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/favorites" element={<FavoritePage />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthContextProvider>
   );
 }
 

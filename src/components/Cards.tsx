@@ -1,25 +1,25 @@
 import { Badge, Button, Card, Col, Row } from "react-bootstrap";
 import { FoodItem } from "../interface/FoodItem";
 import { timestampToString } from "../functions/Date";
+import { useAuth } from "../context/Auth";
 
 export const Cards = ({
-  user,
   foodList,
   updateFood,
   deleteFood,
 }: {
-  user: any;
   foodList: FoodItem[];
   updateFood: Function;
   deleteFood: Function;
 }) => {
+  const user = useAuth().user;
   return (
     <>
       {foodList && foodList.length > 0 ? (
         <Row md={4} className="g-4">
           {foodList.map(
             (food, index) =>
-              food.userId == user.uid && (
+              food.userId == user?.uid && (
                 <Col key={index}>
                   <Card
                     className="flex"

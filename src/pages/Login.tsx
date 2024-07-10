@@ -19,6 +19,7 @@ export const LoginPage = () => {
     setAuthenticating(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      navigate("/dashboard");
     } catch (error) {
       setAuthenticating(false);
       setError(getErrorMessage(error));

@@ -5,14 +5,15 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import { addSuccess, invalidInputWarning } from "../functions/Alert";
 import { CrudForm } from "./CrudForm";
+import { useAuth } from "../context/Auth";
 
 interface AddProps {
-  user: any;
   getFoodList: Function;
   setIsAdding: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const Add = ({ user, getFoodList, setIsAdding }: AddProps) => {
+export const Add = ({ getFoodList, setIsAdding }: AddProps) => {
+  const user = useAuth().user;
   const [name, setName] = useState<string>("");
   const [price, setPrice] = useState<number>(0);
   const [image, setImage] = useState<any>();
@@ -34,7 +35,7 @@ export const Add = ({ user, getFoodList, setIsAdding }: AddProps) => {
     }
 
     // Upload image to storage
-    const imagePath = "images/" + `${user.uid}/` + uuidv4();
+    const imagePath = "images/" + `${user?.uid}/` + uuidv4();
     const storageRef = ref(storage, imagePath);
     try {
       await uploadBytes(storageRef, image);
@@ -43,19 +44,19 @@ export const Add = ({ user, getFoodList, setIsAdding }: AddProps) => {
     }
 
     getDownloadURL(storageRef) // Download image url
-      .then(async (url) => {
-        const imageURL = url;
-        await addDoc(collection(db, "food"), {
+      .then(async (imageURL) => {
+        const newFood = {
           name: name,
           price: price,
           date: date,
           post: post,
-          userId: user.uid,
-          business: user.displayName,
+          userId: user?.uid,
+          business: user?.displayName,
           imageURL: imageURL,
           imagePath: imagePath,
           cuisine: cuisine,
-        });
+        };
+        await addDoc(collection(db, "food"), newFood);
         setIsAdding(false);
         getFoodList();
         addSuccess(name, price);

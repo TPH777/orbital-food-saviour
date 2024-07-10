@@ -5,6 +5,7 @@ import { Search } from "../components/Search";
 import { FoodItem } from "../interface/FoodItem";
 import { timestampToString } from "../functions/Date";
 import { getFoodList } from "../functions/GetFood";
+// import { HeartSwitch } from "@anatoliygatt/heart-switch";
 
 export function Home() {
   const [foodList, setFoodList] = useState<FoodItem[]>([]);
@@ -19,8 +20,7 @@ export function Home() {
       setIsLoading(true);
       const updatedFoodList = await getFoodList();
       const postedFoodList = updatedFoodList.filter((food) => {
-        // Display posted food items only
-        return food.post === true;
+        return food.post === true; // Display posted food items only
       });
       setFoodList(postedFoodList);
       setIsLoading(false);
@@ -88,11 +88,7 @@ export function Home() {
                 <Card.Body>
                   <Card.Title>{food.name}</Card.Title>
                   <Card.Subtitle>${food.price}</Card.Subtitle>
-                  <Card.Text>
-                    {food.date
-                      ? `Date: ${timestampToString(food.date)}`
-                      : "No Date"}
-                  </Card.Text>
+                  <Card.Text>Date: ${timestampToString(food.date)}</Card.Text>
                   <Badge
                     style={{ cursor: "pointer" }}
                     pill
@@ -111,6 +107,12 @@ export function Home() {
                   >
                     {food.business}
                   </Badge>
+                  {/* <HeartSwitch
+                    checked={checkedFav}
+                    onChange={(event) => {
+                      handleFavChange(event.target.checked, food.id)
+                    }}
+                  /> */}
                 </Card.Body>
               </Card>
             </Col>
