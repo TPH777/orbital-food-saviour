@@ -5,6 +5,9 @@ import { Search } from "../components/Search";
 import { FoodItem } from "../interface/FoodItem";
 import { timestampToString } from "../functions/Date";
 import { getFoodList } from "../functions/GetFood";
+import { useAuth } from "../context/Auth";
+import { getFavFoodList } from "../functions/GetFav";
+// import { HeartSwitch } from "@anatoliygatt/heart-switch";
 
 export function FavoritePage() {
   const [foodList, setFoodList] = useState<FoodItem[]>([]);
@@ -13,25 +16,36 @@ export function FavoritePage() {
   const [sort, setSort] = useState<string>("~Sort~");
   const [business, setBusiness] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { user, isConsumer } = useAuth();
 
   const fetchFoodList = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const updatedFoodList = await getFoodList();
-      const postedFoodList = updatedFoodList.filter((food) => {
-        // Display posted food items only
-        return food.post === true;
-      });
-      setFoodList(postedFoodList);
-      setIsLoading(false);
+      const postedFoodList = updatedFoodList.filter(
+        (food) => food.post === true
+      );
+      let finalFoodList = postedFoodList;
+
+      if (user && isConsumer) {
+        const userFavList = await getFavFoodList(user); // Array of string of food.id of user favorites
+        finalFoodList = postedFoodList.filter((food) =>
+          userFavList.includes(food.id)
+        );
+      }
+
+      setFoodList(finalFoodList);
     } catch (error) {
       console.error("Error fetching food items:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // To wait for async auth
   useEffect(() => {
     fetchFoodList();
-  }, []);
+  }, [user, isConsumer]);
 
   const searchFoodList = foodList.filter((food) => {
     const nameMatches = food.name.toLowerCase().includes(search.toLowerCase()); // Search Bar
@@ -43,7 +57,7 @@ export function FavoritePage() {
   searchFoodList.sort((a, b) => {
     // Sort
     if (sort === "Name") {
-      return a.name > b.name ? 1 : -1;
+      return a.name.localeCompare(b.name);
     } else if (sort === "Price") {
       return a.price > b.price ? 1 : -1;
     } else if (sort === "Cuisine") {
@@ -88,11 +102,7 @@ export function FavoritePage() {
                 <Card.Body>
                   <Card.Title>{food.name}</Card.Title>
                   <Card.Subtitle>${food.price}</Card.Subtitle>
-                  <Card.Text>
-                    {food.date
-                      ? `Date: ${timestampToString(food.date)}`
-                      : "No Date"}
-                  </Card.Text>
+                  <Card.Text>Date: ${timestampToString(food.date)}</Card.Text>
                   <Badge
                     style={{ cursor: "pointer" }}
                     pill
@@ -111,6 +121,12 @@ export function FavoritePage() {
                   >
                     {food.business}
                   </Badge>
+                  {/* <HeartSwitch
+                    checked={checkedFav}
+                    onChange={(event) => {
+                      handleFavChange(event.target.checked, food.id)
+                    }}
+                  /> */}
                 </Card.Body>
               </Card>
             </Col>

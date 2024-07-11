@@ -5,6 +5,8 @@ import { Search } from "../components/Search";
 import { FoodItem } from "../interface/FoodItem";
 import { timestampToString } from "../functions/Date";
 import { getFoodList } from "../functions/GetFood";
+import { useAuth } from "../context/Auth";
+import { getFavFoodList } from "../functions/GetFav";
 // import { HeartSwitch } from "@anatoliygatt/heart-switch";
 
 export function Home() {
@@ -14,24 +16,32 @@ export function Home() {
   const [sort, setSort] = useState<string>("~Sort~");
   const [business, setBusiness] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [favList, setFavList] = useState<string[]>([]);
+  const { user, isConsumer } = useAuth();
 
   const fetchFoodList = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const updatedFoodList = await getFoodList();
       const postedFoodList = updatedFoodList.filter((food) => {
         return food.post === true; // Display posted food items only
       });
       setFoodList(postedFoodList);
-      setIsLoading(false);
+      if (user && isConsumer) {
+        const userFavList = await getFavFoodList(user);
+        setFavList(userFavList);
+      }
     } catch (error) {
       console.error("Error fetching food items:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // To wait for async auth
   useEffect(() => {
     fetchFoodList();
-  }, []);
+  }, [user, isConsumer]);
 
   const searchFoodList = foodList.filter((food) => {
     const nameMatches = food.name.toLowerCase().includes(search.toLowerCase()); // Search Bar
@@ -43,7 +53,7 @@ export function Home() {
   searchFoodList.sort((a, b) => {
     // Sort
     if (sort === "Name") {
-      return a.name > b.name ? 1 : -1;
+      return a.name.localeCompare(b.name);
     } else if (sort === "Price") {
       return a.price > b.price ? 1 : -1;
     } else if (sort === "Cuisine") {
