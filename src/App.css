@@ -5,6 +5,9 @@
   background-position: center;
   background-repeat: repeat;
   height: 200vh;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .card-img-top {

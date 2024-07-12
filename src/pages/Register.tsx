@@ -36,7 +36,9 @@ export const RegisterPage = () => {
         const user = userCredential.user;
         if (isConsumer) {
           // Adding user id as a document to the consumer collection
-          await setDoc(doc(db, "consumer", user.uid), {});
+          await setDoc(doc(db, "consumer", user.uid), {
+            favorites: [],
+          });
         }
         return updateProfile(user, { displayName: name });
       })
