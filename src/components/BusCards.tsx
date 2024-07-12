@@ -3,7 +3,7 @@ import { FoodItem } from "../interface/FoodItem";
 import { timestampToString } from "../functions/Date";
 import { useAuth } from "../context/Auth";
 
-export const Cards = ({
+export const BusCards = ({
   foodList,
   updateFood,
   deleteFood,

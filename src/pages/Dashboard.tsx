@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { db } from "../config/firebase";
 import { doc, deleteDoc, getDoc } from "firebase/firestore";
-import { Cards } from "../components/Cards";
+import { BusCards } from "../components/BusCards";
 import { Edit } from "../components/Edit";
 import { Add } from "../components/Add";
 import { deleteObject, getStorage, ref } from "firebase/storage";
@@ -14,22 +14,26 @@ import { useAuth } from "../context/Auth";
 import { useNavigate } from "react-router-dom";
 
 export function Dashboard() {
-  const user = useAuth().user;
+  const { user, isConsumer } = useAuth(); // Auth context
+  // Redirect the user if not authenticated or a consumer
   let navigate = useNavigate();
   if (!user) {
     navigate("/login");
   }
+  if (isConsumer) {
+    navigate("/");
+  }
 
-  const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [selectedFoodId, setSelectedFoodId] = useState<string>("");
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [foodList, setFoodList] = useState<FoodItem[]>([]);
-  const [search, setSearch] = useState<string>("");
-  const [cuisine, setCuisine] = useState<string>("~Cuisine~");
-  const [sort, setSort] = useState<string>("~Sort~");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isAdding, setIsAdding] = useState<boolean>(false); // State for adding a new food item
+  const [selectedFoodId, setSelectedFoodId] = useState<string>(""); // State for selected food item ID
+  const [isEditing, setIsEditing] = useState<boolean>(false); // State for editing a food item
+  const [foodList, setFoodList] = useState<FoodItem[]>([]); // State for the list of food items
+  const [search, setSearch] = useState<string>(""); // State for search query
+  const [cuisine, setCuisine] = useState<string>("~Cuisine~"); // State for selected cuisine
+  const [sort, setSort] = useState<string>("~Sort~"); // State for sorting option
+  const [isLoading, setIsLoading] = useState<boolean>(false); // State for loading status
 
-  // To set food list
+  // Fetch food items from the database
   const fetchFoodList = async () => {
     try {
       setIsLoading(true);
@@ -40,62 +44,72 @@ export function Dashboard() {
     }
   };
 
+  // Fetch food list when user or consumer status changes
   useEffect(() => {
     fetchFoodList();
+  }, [user, isConsumer]);
+
+  // Delete food item from the database
+  const deleteFood = useCallback(
+    async (id: string) => {
+      const confirm = await deleteWarning(); // Show delete confirmation
+      if (confirm) {
+        try {
+          const foodDoc = doc(db, "food", id);
+          const data = (await getDoc(foodDoc)).data();
+          if (data !== undefined) {
+            await deleteObject(ref(getStorage(), data.imagePath)); // Delete image from storage
+            await deleteDoc(foodDoc); // Delete food document
+            setFoodList(foodList.filter((food) => food.id !== id)); // Update food list
+            deleteSuccess(data.name); // Show success message
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    },
+    [foodList]
+  ); // Depend on foodList to re-create callback when foodList changes
+
+  // Update food item (set editing state)
+  const updateFood = useCallback((id: string) => {
+    setSelectedFoodId(id); // Set selected food ID
+    setIsEditing(true); // Set editing state
   }, []);
 
-  const deleteFood = async (id: string) => {
-    const confirm = await deleteWarning();
-    if (confirm) {
-      try {
-        const foodDoc = doc(db, "food", id);
-        const data = (await getDoc(foodDoc)).data();
-        if (data !== undefined) {
-          await deleteObject(ref(getStorage(), data.imagePath));
-          await deleteDoc(foodDoc);
-          setFoodList(foodList.filter((food) => food.id !== id));
-          deleteSuccess(data.name);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  };
+  // Filter and sort the food list based on search, cuisine, and sort criteria
+  const searchFoodList = useMemo(() => {
+    return foodList
+      .filter((food) => {
+        const nameMatches = food.name
+          .toLowerCase()
+          .includes(search.toLowerCase());
+        const cuisineMatches =
+          cuisine === "~Cuisine~" || food.cuisine === cuisine;
+        return nameMatches && cuisineMatches;
+      })
+      .sort((a, b) => {
+        if (sort === "Date") return a.date > b.date ? 1 : -1;
+        if (sort === "Price") return a.price > b.price ? 1 : -1;
+        if (sort === "Cuisine") return a.cuisine > b.cuisine ? 1 : -1;
+        return a.name.localeCompare(b.name); // Default by name
+      });
+  }, [foodList, search, cuisine, sort]); // Depend on foodList, search, cuisine, and sort to re-create memoized value
 
-  const updateFood = async (id: string) => {
-    setSelectedFoodId(id);
-    setIsEditing(true);
-  };
-
-  const searchFoodList = foodList.filter((food) => {
-    const nameMatches = food.name.toLowerCase().includes(search.toLowerCase()); // Search
-    const cuisineMatches = cuisine === "~Cuisine~" || food.cuisine === cuisine; // Filter
-    return nameMatches && cuisineMatches;
-  });
-
-  searchFoodList.sort((a, b) => {
-    // Sort
-    if (sort === "Date") {
-      return a.date > b.date ? 1 : -1;
-    } else if (sort === "Price") {
-      return a.price > b.price ? 1 : -1;
-    } else if (sort === "Cuisine") {
-      return a.cuisine > b.cuisine ? 1 : -1;
-    } else {
-      return a.name > b.name ? 1 : -1; // Default by name
-    }
-  });
   return (
     <>
+      {/* Display loading spinner */}
       {isLoading && (
         <Spinner animation="border" role="status">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
       )}
+
       {!isLoading && !isAdding && !isEditing && (
         <>
           <h1 className="mb-4">{user?.displayName}'s Dashboard</h1>
           <div className="d-grid gap-2 mb-4">
+            {/* Button to add new food */}
             <button
               type="button"
               className="btn btn-primary btn-block"
@@ -105,6 +119,7 @@ export function Dashboard() {
             </button>
           </div>
 
+          {/* Search component for filtering food items */}
           <Search
             search={search}
             cuisine={cuisine}
@@ -114,7 +129,8 @@ export function Dashboard() {
             setSort={setSort}
           />
 
-          <Cards
+          {/* Display business created food items */}
+          <BusCards
             foodList={searchFoodList}
             updateFood={updateFood}
             deleteFood={deleteFood}
@@ -122,10 +138,12 @@ export function Dashboard() {
         </>
       )}
 
+      {/* Display adding form */}
       {isAdding && (
         <Add getFoodList={fetchFoodList} setIsAdding={setIsAdding} />
       )}
 
+      {/* Display editing form */}
       {isEditing && (
         <Edit
           foodList={foodList}
