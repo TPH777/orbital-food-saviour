@@ -6,7 +6,7 @@ import { getFoodList } from "../functions/GetFood";
 import { useAuth } from "../context/Auth";
 import { getFavFoodList } from "../functions/GetFav";
 import { useNavigate } from "react-router-dom";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, increment, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { ConCards } from "../components/ConCards";
 
@@ -72,10 +72,30 @@ export function Home() {
       navigate("/login"); // Redirect to login if not logged in
     } else {
       setFavList((prev) => {
-        const newFavList = prev.includes(foodId)
-          ? prev.filter((id) => id !== foodId) // Remove from favorites
-          : [...prev, foodId]; // Add to favorites
+        const add = !prev.includes(foodId);
+        const newFavList = add
+          ? [...prev, foodId] // Add to favorites
+          : prev.filter((id) => id !== foodId); // Remove from favorites
         updateDoc(doc(db, "consumer", user.uid), { favorites: newFavList }); // Update in Firestore
+
+        // Update favorite count in Firestore
+        updateDoc(doc(db, "food", foodId), {
+          favoriteCount: add ? increment(1) : increment(-1),
+        });
+
+        // Update local state for favorite count
+        setFoodList((prevFoodList) =>
+          prevFoodList.map((food) =>
+            food.id === foodId
+              ? {
+                  ...food,
+                  favoriteCount: add
+                    ? food.favoriteCount + 1
+                    : food.favoriteCount - 1,
+                }
+              : food
+          )
+        );
         return newFavList;
       });
     }

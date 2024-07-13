@@ -6,7 +6,7 @@ import { getFoodList } from "../functions/GetFood";
 import { useAuth } from "../context/Auth";
 import { getFavFoodList } from "../functions/GetFav";
 import { useNavigate } from "react-router-dom";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, increment, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { deleteWarning } from "../functions/Alert";
 import { ConCards } from "../components/ConCards";
@@ -78,19 +78,21 @@ export function FavoritePage() {
 
   // Function to toggle favorite status of a food item
   const toggleFavorite = useCallback(async (foodId: string) => {
-    if (!user) {
-      navigate("/login");
-    } else {
-      const confirm = await deleteWarning();
-      if (confirm) {
-        setFoodList((prev) => {
-          const newFavList = prev.filter((food) => food.id !== foodId);
-          updateDoc(doc(db, "consumer", user.uid), {
-            favorites: newFavList.map((f) => f.id),
-          });
-          return newFavList;
+    const confirm = await deleteWarning();
+    if (confirm) {
+      setFoodList((prev) => {
+        // Remove from favorites
+        const newFavList = prev.filter((food) => food.id !== foodId);
+        updateDoc(doc(db, "consumer", user.uid), {
+          favorites: newFavList.map((f) => f.id),
         });
-      }
+
+        // Decrement favorite count in Firestore
+        updateDoc(doc(db, "food", foodId), {
+          favoriteCount: increment(-1),
+        });
+        return newFavList;
+      });
     }
   }, []);
 

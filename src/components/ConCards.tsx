@@ -1,4 +1,4 @@
-import { Badge, Card, Col, Row } from "react-bootstrap";
+import { Badge, Card, Col, Container, Row } from "react-bootstrap";
 import { timestampToString } from "../functions/Date";
 import { HeartSwitch } from "@anatoliygatt/heart-switch";
 import { FoodItem } from "../interface/FoodItem";
@@ -53,11 +53,18 @@ export const ConCards = ({
               {food.business}
             </Badge>
             {/* HeartSwitch to toggle favorite status */}
-            <HeartSwitch
-              size="sm"
-              checked={favList.includes(food.id)}
-              onChange={() => toggleFavorite(food.id)}
-            />
+            <Container className="mt-2">
+              <Row className="justify-content-md-end">
+                <Col xs={2}>
+                  <HeartSwitch
+                    size="sm"
+                    checked={favList.includes(food.id)}
+                    onChange={() => toggleFavorite(food.id)}
+                  />
+                </Col>
+                <Col xs={1}>{food.favoriteCount || 0}</Col>
+              </Row>
+            </Container>
           </Card.Body>
         </Card>
       </Col>

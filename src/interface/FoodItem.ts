@@ -9,4 +9,5 @@ export interface FoodItem {
   business: string;   // Name of the business posted the food item
   imageURL: string;   // URL to the image of the food item
   imagePath: string;  // Path to access the image of the food item in firebase storage
+  favoriteCount: number;
 }

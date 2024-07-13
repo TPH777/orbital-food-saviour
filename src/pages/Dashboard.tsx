@@ -19,9 +19,11 @@ export function Dashboard() {
   let navigate = useNavigate();
   if (!user) {
     navigate("/login");
+    return;
   }
   if (isConsumer) {
     navigate("/");
+    return;
   }
 
   const [isAdding, setIsAdding] = useState<boolean>(false); // State for adding a new food item
@@ -107,7 +109,7 @@ export function Dashboard() {
 
       {!isLoading && !isAdding && !isEditing && (
         <>
-          <h1 className="mb-4">{user?.displayName}'s Dashboard</h1>
+          <h1 className="mb-4">{user.displayName}'s Dashboard</h1>
           <div className="d-grid gap-2 mb-4">
             {/* Button to add new food */}
             <button
