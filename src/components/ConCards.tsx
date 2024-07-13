@@ -21,7 +21,11 @@ export const ConCards = ({
     {/* Map through the filtered food list and display each food item */}
     {searchFoodList.map((food, index) => (
       <Col key={index}>
-        <Card className="flex" key={food.id}>
+        <Card
+          className="flex"
+          bg={food.post ? "light" : "secondary"}
+          key={food.id}
+        >
           <Card.Img variant="top" src={food.imageURL} /> {/* Food image */}
           <Card.Body>
             <Card.Title>{food.name}</Card.Title> {/* Food name */}

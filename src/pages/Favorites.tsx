@@ -17,9 +17,11 @@ export function FavoritePage() {
   let navigate = useNavigate();
   if (!user) {
     navigate("/login");
+    return;
   }
   if (!isConsumer) {
     navigate("/");
+    return;
   }
 
   const [foodList, setFoodList] = useState<FoodItem[]>([]); // State for user favorite food items
@@ -34,17 +36,10 @@ export function FavoritePage() {
     setIsLoading(true);
     try {
       const updatedFoodList = await getFoodList();
-      const postedFoodList = updatedFoodList.filter(
-        (food) => food.post === true // posted items
+      const userFavList = await getFavFoodList(user); // Array of string of food.id of user favorites
+      const finalFoodList = updatedFoodList.filter(
+        (food) => userFavList.includes(food.id) // fav food items
       );
-      let finalFoodList = postedFoodList;
-
-      if (user && isConsumer) {
-        const userFavList = await getFavFoodList(user); // Array of string of food.id of user favorites
-        finalFoodList = postedFoodList.filter(
-          (food) => userFavList.includes(food.id) // fav items
-        );
-      }
       setFoodList(finalFoodList);
     } catch (error) {
       console.error("Error fetching food items:", error);
