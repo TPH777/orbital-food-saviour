@@ -7,6 +7,7 @@ import { RegisterPage } from "./pages/Register";
 import { Dashboard } from "./pages/Dashboard";
 import { FavoritePage } from "./pages/Favorites";
 import { AuthContextProvider } from "./context/Auth";
+import { APIProvider } from "@vis.gl/react-google-maps";
 
 function App() {
   return (
