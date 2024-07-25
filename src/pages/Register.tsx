@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ErrorText from "../components/ErrorText";
-import { auth, db } from "../config/firebase";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth, db, googleProvider } from "../config/firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  updateProfile,
+} from "firebase/auth";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
 import { doc, setDoc } from "firebase/firestore";
 
@@ -59,6 +63,23 @@ export const RegisterPage = () => {
       });
   };
 
+  const googleSignIn = async () => {
+    setRegistering(true);
+    await signInWithPopup(auth, googleProvider)
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        if (!doc(db, "consumer", user.uid)) {
+          // Document don't exist (New user)
+          await setDoc(doc(db, "consumer", user.uid), {});
+        }
+        navigate("/");
+      })
+      .catch((error) => {
+        setRegistering(false);
+        setError(error.message);
+      });
+  };
+
   return (
     <form
       onSubmit={(e) => {
@@ -66,18 +87,64 @@ export const RegisterPage = () => {
         signUpWithEmailAndPassword();
       }}
     >
+      <div className="d-grid gap-2 mb-4">
+        <ButtonGroup>
+          <ToggleButton
+            id="post-checked"
+            type="radio"
+            variant={"outline-success"}
+            value={1}
+            checked={isConsumer === true}
+            onChange={() => setIsConsumer(true)}
+          >
+            Consumer
+          </ToggleButton>
+          <ToggleButton
+            id="post-unchecked"
+            type="radio"
+            variant={"outline-dark"}
+            value={2}
+            checked={isConsumer === false}
+            onChange={() => setIsConsumer(false)}
+          >
+            Business
+          </ToggleButton>
+        </ButtonGroup>
+      </div>
+
       <div className="form-outline mb-4">
-        <label>Name</label>
-        <input
-          type="text"
-          name="name"
-          id="name"
-          placeholder="Name"
-          className="form-control"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        {isConsumer ? (
+          <>
+            <button
+              onClick={googleSignIn}
+              disabled={registering}
+              className="btn btn-dark ms-3"
+            >
+              <img
+                src="/pictures/google-logo.png"
+                alt="logo"
+                width="30"
+                height="30"
+                className="d-inline-block align-top me-2"
+              />
+              {registering ? "Registering..." : "Register with Google"}
+            </button>
+          </>
+        ) : (
+          <>
+            <label>Name</label>
+            <input
+              type="text"
+              name="name"
+              id="name"
+              placeholder="Name"
+              className="form-control"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </>
+        )}
       </div>
 
       <div className="form-outline mb-4">
@@ -124,28 +191,6 @@ export const RegisterPage = () => {
         />
       </div>
       <div className="mb-4">
-        <ButtonGroup>
-          <ToggleButton
-            id="post-checked"
-            type="radio"
-            variant={"outline-success"}
-            value={1}
-            checked={isConsumer === true}
-            onChange={() => setIsConsumer(true)}
-          >
-            Consumer
-          </ToggleButton>
-          <ToggleButton
-            id="post-unchecked"
-            type="radio"
-            variant={"outline-dark"}
-            value={2}
-            checked={isConsumer === false}
-            onChange={() => setIsConsumer(false)}
-          >
-            Business
-          </ToggleButton>
-        </ButtonGroup>
         <button
           disabled={registering}
           type="submit"

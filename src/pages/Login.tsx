@@ -92,7 +92,7 @@ export const LoginPage = () => {
             height="30"
             className="d-inline-block align-top me-2"
           />
-          {authenticating ? "Signing In..." : "Google Sign In (Consumer)"}
+          {authenticating ? "Signing In..." : "Google Sign In for Consumers"}
         </button>
       </div>
 
