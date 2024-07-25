@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { doc, increment, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { ConCards } from "../components/ConCards";
+import { consumersOnly } from "../functions/Alert";
 
 export function Home() {
   const [foodList, setFoodList] = useState<FoodItem[]>([]); // State for all posted food items
@@ -61,6 +62,8 @@ export function Home() {
         if (sort === "Name") return a.name.localeCompare(b.name);
         if (sort === "Price") return a.price > b.price ? 1 : -1;
         if (sort === "Cuisine") return a.cuisine > b.cuisine ? 1 : -1;
+        if (sort === "Favorites")
+          return a.favoriteCount < b.favoriteCount ? 1 : -1;
         return a.date > b.date ? 1 : -1;
       });
   }, [foodList, search, cuisine, business, sort]);
@@ -70,6 +73,9 @@ export function Home() {
   const toggleFavorite = useCallback(async (foodId: string) => {
     if (!user) {
       navigate("/login"); // Redirect to login if not logged in
+    } else if (!isConsumer) {
+      consumersOnly(); // Alert businesses that they cant save favorites
+      return;
     } else {
       setFavList((prev) => {
         const add = !prev.includes(foodId);

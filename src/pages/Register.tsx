@@ -22,12 +22,14 @@ export const RegisterPage = () => {
   const navigate = useNavigate();
 
   const signUpWithEmailAndPassword = () => {
-    if (!name || !email || !password || !confirm) {
+    if ((!isConsumer && !name) || !email || !password || !confirm) {
+      // Empty field
       setError("Please fill in all fields.");
       return;
     }
 
     if (password !== confirm) {
+      // Different password
       setError("Passwords do not match.");
       return;
     }
@@ -50,6 +52,7 @@ export const RegisterPage = () => {
         navigate("/dashboard");
       })
       .catch((error) => {
+        // Error management
         if (error.code === "auth/weak-password") {
           setError("Please enter a stronger password.");
         } else if (error.code === "auth/email-already-in-use") {

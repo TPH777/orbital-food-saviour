@@ -94,6 +94,8 @@ export function Dashboard() {
         if (sort === "Date") return a.date > b.date ? 1 : -1;
         if (sort === "Price") return a.price > b.price ? 1 : -1;
         if (sort === "Cuisine") return a.cuisine > b.cuisine ? 1 : -1;
+        if (sort === "Favorites")
+          return a.favoriteCount < b.favoriteCount ? 1 : -1;
         return a.name.localeCompare(b.name); // Default by name
       });
   }, [foodList, search, cuisine, sort]); // Depend on foodList, search, cuisine, and sort to re-create memoized value

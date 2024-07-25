@@ -56,6 +56,7 @@ export const Search = ({
               <option key="name">Name</option>
               <option key="date">Date</option>
               <option key="price">Price</option>
+              <option key="favorites">Favorites</option>
               <option key="cuisine">Cuisine</option>
             </Form.Select>
           </Col>
