@@ -8,7 +8,7 @@ import {
 } from "@react-google-maps/api";
 
 const singaporeLoc = { lat: 1.3521, lng: 103.8198 };
-const gMapKey = import.meta.env.VITE_REACT_APP_gmap;
+const gMapKey = import.meta.env.VITE_REACT_APP_gmap; //gmap api key
 const markers = [
   {
     id: 1,
@@ -25,7 +25,7 @@ const markers = [
     name: "Botanic Garden",
     position: { lat: 1.3223, lng: 103.8149 },
   },
-];
+]; //need replace with db data
 
 function App() {
   const [cusLatitude, setLatitude] = useState(null);
@@ -72,6 +72,7 @@ function App() {
   };
 
   const calculateDistances = async () => {
+    //calc distance of customer to every other location
     try {
       const origins = [{ lat: cusLatitude, lng: cusLongitude }];
       const destinations = markers.map((marker) => ({
@@ -129,28 +130,32 @@ function App() {
                     anchor: new google.maps.Point(0, 32),
                   }}
                 >
-                  {activeMarker === 0 && (
+                  {activeMarker === 0 && ( //show customer loc
                     <InfoWindowF onCloseClick={() => setActiveMarker(null)}>
                       <div>Current location</div>
                     </InfoWindowF>
                   )}
                 </MarkerF>
               )}
-              {distances.map(({ id, name, position, distance }) => (
-                <MarkerF
-                  key={id}
-                  position={position}
-                  onClick={() => handleActiveMarker(id)}
-                >
-                  {activeMarker === id && (
-                    <InfoWindowF onCloseClick={() => setActiveMarker(null)}>
-                      <div>
-                        <strong>{name}</strong> <br /> Distance: {distance}
-                      </div>
-                    </InfoWindowF>
-                  )}
-                </MarkerF>
-              ))}
+              {distances.map(
+                (
+                  { id, name, position, distance } //show the rest loc
+                ) => (
+                  <MarkerF
+                    key={id}
+                    position={position}
+                    onClick={() => handleActiveMarker(id)}
+                  >
+                    {activeMarker === id && (
+                      <InfoWindowF onCloseClick={() => setActiveMarker(null)}>
+                        <div>
+                          <strong>{name}</strong> <br /> Distance: {distance}
+                        </div>
+                      </InfoWindowF>
+                    )}
+                  </MarkerF>
+                )
+              )}
             </GoogleMap>
           ) : (
             <div>Loading...</div>
