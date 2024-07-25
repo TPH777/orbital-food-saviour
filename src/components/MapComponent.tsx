@@ -10,6 +10,27 @@ import { useLocationContext } from "../context/Location";
 // Google Maps API key from environment variable
 const gMapKey = import.meta.env.VITE_REACT_APP_gmap;
 const singaporeLoc = { lat: 1.3521, lng: 103.8198 };
+var first = true;
+const markers = [
+  {
+    id: 4,
+    name: "NUS",
+    distance: "5",
+    position: { lat: 1.2966, lng: 103.77641 },
+  },
+  {
+    id: 2,
+    name: "Kent Ridge",
+    distance: "",
+    position: { lat: 1.2933, lng: 103.7831 },
+  },
+  {
+    id: 3,
+    name: "Botanic Garden",
+    distance: "",
+    position: { lat: 1.3223, lng: 103.8149 },
+  },
+];
 
 const MapComponent: React.FC = () => {
   // State for customer position and active marker
@@ -24,6 +45,12 @@ const MapComponent: React.FC = () => {
 
   // State for locations from context
   const { locations, setLocations } = useLocationContext();
+  useEffect(() => {
+    if (first) {
+      setLocations(markers);
+      first = false;
+    }
+  });
 
   // Load the Google Maps script
   const { isLoaded } = useLoadScript({ googleMapsApiKey: gMapKey });
@@ -48,6 +75,11 @@ const MapComponent: React.FC = () => {
     }
   }, [cusPos, isLoaded]);
 
+  // Debugging: Log locations when they are updated
+  useEffect(() => {
+    console.log("Updated locations:", locations);
+  }, [locations]);
+
   // Handle marker click and set the active marker
   const handleActiveMarker = (markerId: number | null) => {
     setActiveMarker(markerId);
@@ -64,7 +96,10 @@ const MapComponent: React.FC = () => {
     if (!cusPos) return;
     const service = new google.maps.DistanceMatrixService();
     const origins = [{ lat: cusPos.lat, lng: cusPos.lng }];
-    const destinations = locations.map((marker) => marker.position);
+    const destinations = markers.map((marker) => ({
+      lat: marker.position.lat,
+      lng: marker.position.lng,
+    }));
 
     service.getDistanceMatrix(
       {
@@ -80,6 +115,8 @@ const MapComponent: React.FC = () => {
             distance: result.distance.text,
           }));
           setLocations(updatedLocations);
+          console.log(updatedLocations);
+          console.log(locations);
         }
       }
     );
@@ -92,14 +129,14 @@ const MapComponent: React.FC = () => {
         <div style={{ width: "100%", height: "90vh" }}>
           {isLoaded ? (
             <GoogleMap
-              center={currentPosition || singaporeLoc}
+              center={currentPosition || cusPos || singaporeLoc}
               zoom={13}
               onClick={() => handleActiveMarker(null)}
               mapContainerStyle={{ width: "100%", height: "90vh" }}
             >
               {cusPos && (
                 <MarkerF
-                  key={0}
+                  key={cusPos.lat}
                   position={cusPos}
                   onClick={() => handleActiveMarker(0)}
                   icon={{
@@ -118,7 +155,7 @@ const MapComponent: React.FC = () => {
               )}
               {locations.map(({ id, name, position, distance }) => (
                 <MarkerF
-                  key={id}
+                  key={id} // Ensure each marker has a unique key
                   position={position}
                   onClick={() => handleActiveMarker(id)}
                 >
