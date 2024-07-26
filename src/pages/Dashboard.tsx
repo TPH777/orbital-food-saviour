@@ -14,72 +14,73 @@ import { useAuth } from "../context/Auth";
 import { useNavigate } from "react-router-dom";
 
 export function Dashboard() {
-  const { user, isConsumer } = useAuth(); // Auth context
-  // Redirect the user if not authenticated or a consumer
-  let navigate = useNavigate();
-  if (!user) {
-    navigate("/login");
-    return;
-  }
-  if (isConsumer) {
-    navigate("/");
-    return;
-  }
+  const { user, isConsumer } = useAuth();
+  const navigate = useNavigate();
 
-  const [isAdding, setIsAdding] = useState<boolean>(false); // State for adding a new food item
-  const [selectedFoodId, setSelectedFoodId] = useState<string>(""); // State for selected food item ID
-  const [isEditing, setIsEditing] = useState<boolean>(false); // State for editing a food item
-  const [foodList, setFoodList] = useState<FoodItem[]>([]); // State for the list of food items
-  const [search, setSearch] = useState<string>(""); // State for search query
-  const [cuisine, setCuisine] = useState<string>("~Cuisine~"); // State for selected cuisine
-  const [sort, setSort] = useState<string>("~Sort~"); // State for sorting option
-  const [isLoading, setIsLoading] = useState<boolean>(false); // State for loading status
+  const [isAdding, setIsAdding] = useState<boolean>(false);
+  const [selectedFoodId, setSelectedFoodId] = useState<string>("");
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [foodList, setFoodList] = useState<FoodItem[]>([]);
+  const [search, setSearch] = useState<string>("");
+  const [cuisine, setCuisine] = useState<string>("~Cuisine~");
+  const [sort, setSort] = useState<string>("~Sort~");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Fetch food items from the database
+  useEffect(() => {
+    if (user === null) {
+      // Wait for the authentication state to be determined
+      return;
+    }
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    if (isConsumer) {
+      navigate("/");
+      return;
+    }
+    setIsLoading(false);
+    fetchFoodList();
+  }, [user, isConsumer, navigate]);
+
   const fetchFoodList = async () => {
     try {
       setIsLoading(true);
-      setFoodList(await getFoodList());
-      setIsLoading(false);
+      const updatedFoodList = await getFoodList();
+      const businessFoodList = updatedFoodList.filter((food) => {
+        return food.userId === user?.uid; // Display business food items only
+      });
+      setFoodList(businessFoodList);
     } catch (error) {
       console.error("Error fetching food items:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Fetch food list when user or consumer status changes
-  useEffect(() => {
-    fetchFoodList();
-  }, [user, isConsumer]);
-
-  // Delete food item from the database
-  const deleteFood = useCallback(
-    async (id: string) => {
-      const confirm = await deleteWarning(); // Show delete confirmation
-      if (confirm) {
-        try {
-          const foodDoc = doc(db, "food", id);
-          const data = (await getDoc(foodDoc)).data();
-          if (data !== undefined) {
-            await deleteObject(ref(getStorage(), data.imagePath)); // Delete image from storage
-            await deleteDoc(foodDoc); // Delete food document
-            setFoodList(foodList.filter((food) => food.id !== id)); // Update food list
-            deleteSuccess(data.name); // Show success message
-          }
-        } catch (error) {
-          console.log(error);
+  const deleteFood = useCallback(async (id: string) => {
+    const confirm = await deleteWarning();
+    if (confirm) {
+      try {
+        const foodDoc = doc(db, "food", id);
+        const data = (await getDoc(foodDoc)).data();
+        if (data) {
+          await deleteObject(ref(getStorage(), data.imagePath));
+          await deleteDoc(foodDoc);
+          setFoodList((prevList) => prevList.filter((food) => food.id !== id));
+          deleteSuccess(data.name);
         }
+      } catch (error) {
+        console.error("Error deleting food item:", error);
       }
-    },
-    [foodList]
-  ); // Depend on foodList to re-create callback when foodList changes
-
-  // Update food item (set editing state)
-  const updateFood = useCallback((id: string) => {
-    setSelectedFoodId(id); // Set selected food ID
-    setIsEditing(true); // Set editing state
+    }
   }, []);
 
-  // Filter and sort the food list based on search, cuisine, and sort criteria
+  const updateFood = useCallback((id: string) => {
+    setSelectedFoodId(id);
+    setIsEditing(true);
+  }, []);
+
   const searchFoodList = useMemo(() => {
     return foodList
       .filter((food) => {
@@ -96,13 +97,12 @@ export function Dashboard() {
         if (sort === "Cuisine") return a.cuisine > b.cuisine ? 1 : -1;
         if (sort === "Favorites")
           return a.favoriteCount < b.favoriteCount ? 1 : -1;
-        return a.name.localeCompare(b.name); // Default by name
+        return a.name.localeCompare(b.name);
       });
-  }, [foodList, search, cuisine, sort]); // Depend on foodList, search, cuisine, and sort to re-create memoized value
+  }, [foodList, search, cuisine, sort]);
 
   return (
     <>
-      {/* Display loading spinner */}
       {isLoading && (
         <Spinner animation="border" role="status">
           <span className="visually-hidden">Loading...</span>
@@ -111,9 +111,8 @@ export function Dashboard() {
 
       {!isLoading && !isAdding && !isEditing && (
         <>
-          <h1 className="mb-4">{user.displayName}'s Dashboard</h1>
+          <h1 className="mb-4">{user?.displayName}'s Dashboard</h1>
           <div className="d-grid gap-2 mb-4">
-            {/* Button to add new food */}
             <button
               type="button"
               className="btn btn-primary btn-block"
@@ -122,8 +121,6 @@ export function Dashboard() {
               Add new food
             </button>
           </div>
-
-          {/* Search component for filtering food items */}
           <Search
             search={search}
             cuisine={cuisine}
@@ -132,22 +129,19 @@ export function Dashboard() {
             setCuisine={setCuisine}
             setSort={setSort}
           />
-
-          {/* Display business created food items */}
           <BusCards
             foodList={searchFoodList}
             updateFood={updateFood}
             deleteFood={deleteFood}
+            setCuisine={setCuisine}
           />
         </>
       )}
 
-      {/* Display adding form */}
       {isAdding && (
         <Add getFoodList={fetchFoodList} setIsAdding={setIsAdding} />
       )}
 
-      {/* Display editing form */}
       {isEditing && (
         <Edit
           foodList={foodList}

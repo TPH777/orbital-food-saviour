@@ -55,6 +55,7 @@ export const Add = ({ getFoodList, setIsAdding }: AddProps) => {
           imageURL: imageURL,
           imagePath: imagePath,
           cuisine: cuisine,
+          favoriteCount: 0,
         };
         await addDoc(collection(db, "food"), newFood);
         setIsAdding(false);
