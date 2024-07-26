@@ -12,6 +12,7 @@ import { getFoodList } from "../functions/GetFood";
 import { Spinner } from "react-bootstrap";
 import { useAuth } from "../context/Auth";
 import { useNavigate } from "react-router-dom";
+import { deleteFav } from "../functions/DeleteFav";
 
 export function Dashboard() {
   const { user, isConsumer } = useAuth();
@@ -68,6 +69,11 @@ export function Dashboard() {
           await deleteObject(ref(getStorage(), data.imagePath));
           await deleteDoc(foodDoc);
           setFoodList((prevList) => prevList.filter((food) => food.id !== id));
+          try {
+            deleteFav(id); // Delete food item for all conumers that saved it as favorites
+          } catch (error) {
+            throw error;
+          }
           deleteSuccess(data.name);
         }
       } catch (error) {
