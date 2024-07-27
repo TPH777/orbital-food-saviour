@@ -10,7 +10,6 @@ import { doc, increment, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { deleteWarning } from "../functions/Alert";
 import { ConCards } from "../components/ConCards";
-
 export function FavoritePage() {
   const { user, isConsumer } = useAuth(); // Auth context
   // Redirect the user if not authenticated or not a consumer
@@ -48,7 +47,6 @@ export function FavoritePage() {
     }
   };
 
-  // Fetch food list when user or consumer status changes
   useEffect(() => {
     fetchFoodList();
   }, [user, isConsumer]);
