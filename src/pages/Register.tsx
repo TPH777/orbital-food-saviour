@@ -4,7 +4,7 @@ import ErrorText from "../components/ErrorText";
 import { auth, db } from "../config/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, GeoPoint } from "firebase/firestore";
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 
 // Declare libraries outside the component
@@ -78,6 +78,12 @@ export const RegisterPage = () => {
           await setDoc(doc(db, "consumer", user.uid), {
             favorites: [],
           });
+        } else {
+          const locData = {
+            name: name,
+            location: new GeoPoint(bizCoords.lat, bizCoords.lng),
+          };
+          await setDoc(doc(db, "Business", name), locData);
         }
         return updateProfile(user, { displayName: name });
       })
