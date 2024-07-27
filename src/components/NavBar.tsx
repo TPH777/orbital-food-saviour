@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../config/firebase";
 import { Button, Container, Nav, Navbar } from "react-bootstrap";
 import { useAuth } from "../context/Auth";
-import { getCusLoc } from "../functions/getCusLoc";
+// import { getCusLoc } from "../functions/getCusLoc";
 
 export function NavBar() {
   let navigate = useNavigate();
@@ -37,10 +37,7 @@ export function NavBar() {
               {isConsumer ? (
                 [
                   <Nav.Link href="#favorites">Favorites</Nav.Link>,
-                  <Navbar.Text
-                    onClick={getCusLoc}
-                    style={{ cursor: "pointer" }}
-                  >
+                  <Navbar.Text onClick={Logout} style={{ cursor: "pointer" }}>
                     Update Location
                   </Navbar.Text>,
                 ]

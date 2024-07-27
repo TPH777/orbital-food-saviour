@@ -1,9 +1,9 @@
 import React, { useState, useEffect, Fragment } from "react";
 import {
   GoogleMap,
-  useLoadScript,
   MarkerF,
   InfoWindowF,
+  useJsApiLoader,
 } from "@react-google-maps/api";
 import { useLocationContext } from "../context/Location";
 
@@ -15,7 +15,7 @@ const markers = [
   {
     id: 4,
     name: "NUS",
-    distance: "5",
+    distance: "",
     position: { lat: 1.2966, lng: 103.77641 },
   },
   {
@@ -53,7 +53,9 @@ const MapComponent: React.FC = () => {
   });
 
   // Load the Google Maps script
-  const { isLoaded } = useLoadScript({ googleMapsApiKey: gMapKey });
+  const { isLoaded, loadError } = useJsApiLoader({ googleMapsApiKey: gMapKey });
+
+  const mapRef = React.useRef<google.maps.Map | null>(null);
 
   // Fetch user's current position on component mount
   useEffect(() => {
@@ -85,11 +87,30 @@ const MapComponent: React.FC = () => {
     setActiveMarker(markerId);
     if (markerId !== null) {
       const marker = locations.find((loc) => loc.id === markerId);
-      if (marker) setCurrentPosition(marker.position);
-    } else {
-      setCurrentPosition(cusPos);
+      if (marker && mapRef.current) {
+        mapRef.current.panTo(marker.position);
+        setCurrentPosition(marker.position);
+      } else if (markerId === cusPos?.lat) {
+        mapRef.current.panTo(cusPos);
+        setCurrentPosition(cusPos);
+      }
     }
+    // else {
+    //   if (cusPos && mapRef.current) {
+    //     mapRef.current.panTo(cusPos);
+    //   }
+    //   setCurrentPosition(cusPos);
+    // }
   };
+  //   const handleActiveMarker = (markerId: number | null) => {
+  //     setActiveMarker(markerId);
+  //     if (markerId !== null) {
+  //       const marker = locations.find((loc) => loc.id === markerId);
+  //       if (marker) setCurrentPosition(marker.position);
+  //     } else {
+  //       setCurrentPosition(cusPos);
+  //     }
+  //   };
 
   // Calculate distances between customer and other locations
   const calculateDistances = async () => {
@@ -105,7 +126,7 @@ const MapComponent: React.FC = () => {
       {
         origins: origins,
         destinations: destinations,
-        travelMode: "DRIVING",
+        travelMode: google.maps.TravelMode.DRIVING,
       },
       (response, status) => {
         if (status === "OK") {
@@ -115,12 +136,12 @@ const MapComponent: React.FC = () => {
             distance: result.distance.text,
           }));
           setLocations(updatedLocations);
-          console.log(updatedLocations);
-          console.log(locations);
         }
       }
     );
   };
+
+  if (loadError) return <div>Error loading maps</div>;
 
   return (
     <Fragment>
@@ -129,16 +150,17 @@ const MapComponent: React.FC = () => {
         <div style={{ width: "100%", height: "90vh" }}>
           {isLoaded ? (
             <GoogleMap
-              center={currentPosition || cusPos || singaporeLoc}
+              center={cusPos || singaporeLoc}
               zoom={13}
               onClick={() => handleActiveMarker(null)}
               mapContainerStyle={{ width: "100%", height: "90vh" }}
+              onLoad={(map) => (mapRef.current = map)}
             >
               {cusPos && (
                 <MarkerF
                   key={cusPos.lat}
                   position={cusPos}
-                  onClick={() => handleActiveMarker(0)}
+                  onClick={() => handleActiveMarker(cusPos.lat)}
                   icon={{
                     url: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
                     size: new google.maps.Size(20, 32),
@@ -146,7 +168,7 @@ const MapComponent: React.FC = () => {
                     anchor: new google.maps.Point(0, 32),
                   }}
                 >
-                  {activeMarker === 0 && (
+                  {activeMarker === cusPos.lat && (
                     <InfoWindowF onCloseClick={() => handleActiveMarker(null)}>
                       <div>Current location</div>
                     </InfoWindowF>

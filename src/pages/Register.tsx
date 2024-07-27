@@ -1,10 +1,14 @@
-import { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ErrorText from "../components/ErrorText";
 import { auth, db } from "../config/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
 import { doc, setDoc } from "firebase/firestore";
+import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
+
+// Declare libraries outside the component
+const libraries = ["places"];
 
 export const RegisterPage = () => {
   const [registering, setRegistering] = useState<boolean>(false);
@@ -14,8 +18,43 @@ export const RegisterPage = () => {
   const [confirm, setConfirm] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isConsumer, setIsConsumer] = useState<boolean>(true);
+  const [bizLoc, setBizLoc] = useState<string>("");
+  const [bizCoords, setBizCoords] = useState<{ lat: number; lng: number }>({
+    lat: -1,
+    lng: -1,
+  });
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_REACT_APP_gmap,
+    libraries,
+  });
 
   const navigate = useNavigate();
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (autocompleteRef.current && inputRef.current) {
+      autocompleteRef.current.setFields(["formatted_address", "geometry"]);
+      autocompleteRef.current.addListener("place_changed", () => {
+        const place = autocompleteRef.current?.getPlace();
+        if (place?.formatted_address && place?.geometry?.location) {
+          setBizLoc(place.formatted_address);
+          setBizCoords({
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          });
+        }
+      });
+    }
+  }, [isLoaded]);
+
+  useEffect(() => {
+    if (autocompleteRef.current && inputRef.current) {
+      console.log(bizCoords);
+      console.log(bizLoc);
+    }
+  });
 
   const signUpWithEmailAndPassword = () => {
     if (!name || !email || !password || !confirm) {
@@ -123,6 +162,41 @@ export const RegisterPage = () => {
           onChange={(e) => setConfirm(e.target.value)}
         />
       </div>
+      {!isConsumer ? (
+        <div className="form-outline mb-4">
+          <label>Business Location</label>
+          {isLoaded && (
+            <Autocomplete
+              onLoad={(autocomplete) =>
+                (autocompleteRef.current = autocomplete)
+              }
+              onPlaceChanged={() => {
+                const place = autocompleteRef.current?.getPlace();
+                if (place?.formatted_address && place?.geometry?.location) {
+                  setBizLoc(place.formatted_address);
+                  setBizCoords({
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng(),
+                  });
+                }
+              }}
+            >
+              <input
+                ref={inputRef}
+                autoComplete="location"
+                type="text"
+                name="location"
+                id="location"
+                placeholder="Business Location"
+                className="form-control"
+                required
+                value={bizLoc}
+                onChange={(e) => setBizLoc(e.target.value)}
+              />
+            </Autocomplete>
+          )}
+        </div>
+      ) : null}
       <div className="mb-4">
         <ButtonGroup>
           <ToggleButton
@@ -165,3 +239,5 @@ export const RegisterPage = () => {
     </form>
   );
 };
+
+export default RegisterPage;
