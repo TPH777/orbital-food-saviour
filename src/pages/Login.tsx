@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ErrorText from "../components/ErrorText";
 import { auth, db, googleProvider } from "../config/firebase";
@@ -14,32 +14,37 @@ export const LoginPage = () => {
 
   let navigate = useNavigate();
 
-  const defaultSignIn = async (e: any) => {
+  const defaultSignIn = async (e: FormEvent) => {
     e.preventDefault();
-    setAuthenticating(true);
+    if (!email || !password) {
+      // Empty field
+      setError("Please fill in all fields."); // Error Management
+      return;
+    }
+    setAuthenticating(true); // To disable button and show spinner
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
+      navigate("/dashboard"); // successful sign in
     } catch (error) {
       setAuthenticating(false);
-      setError(getErrorMessage(error));
+      setError(getErrorMessage(error)); // Error Management
     }
   };
 
   const googleSignIn = async () => {
-    setAuthenticating(true);
-    await signInWithPopup(auth, googleProvider)
+    setAuthenticating(true); // To disable button and show spinner
+    await signInWithPopup(auth, googleProvider) // Call firebase authenticator
       .then(async (userCredential) => {
         const user = userCredential.user;
         if (!doc(db, "consumer", user.uid)) {
-          // Document don't exist (New user)
+          // Document don't exist (New user - register)
           await setDoc(doc(db, "consumer", user.uid), {});
         }
-        navigate("/");
+        navigate("/"); // successful sign in
       })
       .catch((error) => {
         setAuthenticating(false);
-        setError(error.message);
+        setError(error.message); // Error Management
       });
   };
 
@@ -92,7 +97,7 @@ export const LoginPage = () => {
             height="30"
             className="d-inline-block align-top me-2"
           />
-          {authenticating ? "Signing In..." : "Google Sign In (Consumer)"}
+          {authenticating ? "Signing In..." : "Google Sign In for Consumers"}
         </button>
       </div>
 

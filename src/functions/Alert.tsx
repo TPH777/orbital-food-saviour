@@ -1,5 +1,13 @@
 import swal from "sweetalert";
 
+export function consumersOnly() {
+  swal({
+    icon: "warning",
+    title: "Invalid!",
+    text: `Only consumers account can save favorites`,
+  });
+}
+
 export function deleteWarning(): Promise<boolean> {
   return new Promise((resolve) => {
     swal({
