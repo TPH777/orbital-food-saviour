@@ -79,7 +79,7 @@ export function NavBar() {
                   onClick={updateLocation}
                   style={{ cursor: "pointer" }}
                 >
-                  Update Location
+                  Update Current Location
                 </Navbar.Text>
               </>
             ) : (

@@ -5,13 +5,13 @@ import { getStorage } from "firebase/storage";
 // import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDENRl9aTGHqlTZ5C_EYzwCFUeDPhKXDcI",
-  authDomain: "food-saviour-d4edb.firebaseapp.com",
-  projectId: "food-saviour-d4edb",
-  storageBucket: "food-saviour-d4edb.appspot.com",
-  messagingSenderId: "143331820755",
-  appId: "1:143331820755:web:b4952c3b0f6e1130278026",
-  measurementId: "G-N4KQBXLH37",
+  apiKey: import.meta.env.VITE_REACT_APP_firebase_api,
+  authDomain: import.meta.env.VITE_REACT_APP_firebase_authDomain,
+  projectId: import.meta.env.VITE_REACT_APP_firebase_projectId,
+  storageBucket: import.meta.env.VITE_REACT_APP_firebase_storageBucket,
+  messagingSenderId: import.meta.env.VITE_REACT_APP_firebase_messagingSenderId,
+  appId: import.meta.env.VITE_REACT_APP_firebase_appId,
+  measurementId: import.meta.env.VITE_REACT_APP_firebase_measurementId,
 };
 
 const app = initializeApp(firebaseConfig);
