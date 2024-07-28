@@ -71,42 +71,45 @@ export function Home() {
 
   // Function to toggle favorite status of a food item
   let navigate = useNavigate();
-  const toggleFavorite = useCallback(async (foodId: string) => {
-    if (!user) {
-      navigate("/login"); // Redirect to login if not logged in
-    } else if (!isConsumer) {
-      consumersOnly(); // Alert businesses that they cant save favorites
-      return;
-    } else {
-      setFavList((prev) => {
-        const add = !prev.includes(foodId);
-        const newFavList = add
-          ? [...prev, foodId] // Add to favorites
-          : prev.filter((id) => id !== foodId); // Remove from favorites
-        updateDoc(doc(db, "consumer", user.uid), { favorites: newFavList }); // Update in Firestore
+  const toggleFavorite = useCallback(
+    async (foodId: string) => {
+      if (!user) {
+        navigate("/login"); // Redirect to login if not logged in
+      } else if (!isConsumer) {
+        consumersOnly(); // Alert businesses that they can't save favorites
+        return;
+      } else {
+        setFavList((prev) => {
+          const add = !prev.includes(foodId);
+          const newFavList = add
+            ? [...prev, foodId] // Add to favorites
+            : prev.filter((id) => id !== foodId); // Remove from favorites
+          updateDoc(doc(db, "consumer", user.uid), { favorites: newFavList }); // Update in Firestore
 
-        // Update favorite count in Firestore
-        updateDoc(doc(db, "food", foodId), {
-          favoriteCount: add ? increment(1) : increment(-1),
+          // Update favorite count in Firestore
+          updateDoc(doc(db, "food", foodId), {
+            favoriteCount: add ? increment(1) : increment(-1),
+          });
+
+          // Update local state for favorite count
+          setFoodList((prevFoodList) =>
+            prevFoodList.map((food) =>
+              food.id === foodId
+                ? {
+                    ...food,
+                    favoriteCount: add
+                      ? food.favoriteCount + 1
+                      : food.favoriteCount - 1,
+                  }
+                : food
+            )
+          );
+          return newFavList;
         });
-
-        // Update local state for favorite count
-        setFoodList((prevFoodList) =>
-          prevFoodList.map((food) =>
-            food.id === foodId
-              ? {
-                  ...food,
-                  favoriteCount: add
-                    ? food.favoriteCount + 1
-                    : food.favoriteCount - 1,
-                }
-              : food
-          )
-        );
-        return newFavList;
-      });
-    }
-  }, []);
+      }
+    },
+    [user, isConsumer, navigate]
+  );
 
   return (
     <>
@@ -151,7 +154,7 @@ export function Home() {
       )}
 
       {/* Display MapComponent at the end of the page */}
-      {isConsumer ? <MapComponent /> : null}
+      {(!user || isConsumer) && <MapComponent />}
     </>
   );
 }

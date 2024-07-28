@@ -1,11 +1,18 @@
+import { useState, useCallback } from "react";
+import { collection, GeoPoint, getDocs } from "firebase/firestore";
+import { db } from "../config/firebase";
 import {
   useLocationContext,
   singaporeLoc,
   Location,
 } from "../context/Location";
-import { useState } from "react";
-import { collection, GeoPoint, getDocs } from "firebase/firestore";
-import { db } from "../config/firebase";
+
+interface FirestoreLocation {
+  id: string;
+  name: string;
+  location: GeoPoint;
+}
+
 var local = [singaporeLoc.lat, singaporeLoc.lng];
 
 export const useGetCurLoc = () => {
@@ -43,52 +50,50 @@ export const useGetCurLoc = () => {
 };
 
 export const useUpdateLocations = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state
-  const [locList, setLocList] = useState<{}[]>([]); // State for user favorite food items
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [locList, setLocList] = useState<FirestoreLocation[]>([]);
   const { locations, setLocations } = useLocationContext();
 
-  const getLocList = async () => {
+  const getLocList = async (): Promise<FirestoreLocation[]> => {
     try {
       const locRef = collection(db, "Business");
       const querySnapshot = await getDocs(locRef);
 
       const returnList = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
         id: doc.id,
-      }));
+        name: doc.data().name,
+        location: doc.data().location,
+      })) as FirestoreLocation[];
       return returnList;
     } catch (error) {
       throw error;
     }
   };
 
-  const fetchLocList = async () => {
+  const fetchLocList = useCallback(async () => {
     setIsLoading(true);
     try {
       const updatedLocList = await getLocList();
       setLocList(updatedLocList);
     } catch (error) {
-      console.error("Error fetching food items:", error);
+      console.error("Error fetching locations:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const handleLocationContext = async () => {
+  const handleLocationContext = useCallback(async () => {
     await fetchLocList();
-    local = await getCurLocation();
+    const local = await getCurLocation();
     const updateLoc: Location[] = locList.map((loc) => {
-      const id = loc.id || "";
-      const name = loc.name || "";
-      const geoPoint = loc.location || new GeoPoint(0, 0);
-
+      const { id, name, location } = loc;
       return {
         id,
         name,
         distance: "",
         position: {
-          lat: geoPoint._lat,
-          lng: geoPoint._long,
+          lat: location.latitude,
+          lng: location.longitude,
         },
       };
     });
@@ -100,23 +105,18 @@ export const useUpdateLocations = () => {
       },
       locs: updateLoc,
     });
-    // console.log("help");
-    // console.log(local);
-    // console.log(locations);
-  };
+  }, [fetchLocList, locList, setLocations]);
 
-  const getCurLocation = async () => {
+  const getCurLocation = async (): Promise<[number, number]> => {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          local[0] = latitude;
-          local[1] = longitude;
           resolve([latitude, longitude]);
         },
         (error) => {
           console.error(error);
-          reject(error);
+          reject([singaporeLoc.lat, singaporeLoc.lng]);
         },
         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
@@ -136,7 +136,7 @@ export const useUpdateLocations = () => {
         travelMode: google.maps.TravelMode.DRIVING,
       },
       (response, status) => {
-        if (status === "OK") {
+        if (status === "OK" && response?.rows[0]) {
           const results = response.rows[0].elements;
           const updatedLocations = locations.locs.map((loc, index) => {
             const result = results[index];
@@ -147,10 +147,10 @@ export const useUpdateLocations = () => {
               distance: distanceText,
             };
           });
-          setLocations({
-            curLoc: locations.curLoc,
+          setLocations((prevLocations) => ({
+            curLoc: prevLocations.curLoc,
             locs: updatedLocations,
-          });
+          }));
         } else {
           console.error("Error calculating distances:", status);
         }

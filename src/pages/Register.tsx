@@ -9,10 +9,14 @@ import {
 } from "firebase/auth";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
 import { doc, setDoc, GeoPoint } from "firebase/firestore";
-import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
+import {
+  Autocomplete,
+  Libraries,
+  useJsApiLoader,
+} from "@react-google-maps/api";
 
 // Declare libraries outside the component
-const libraries = ["places"];
+const libraries: Libraries = ["places"];
 
 export const RegisterPage = () => {
   const [registering, setRegistering] = useState<boolean>(false);
@@ -52,13 +56,6 @@ export const RegisterPage = () => {
       });
     }
   }, [isLoaded]);
-
-  useEffect(() => {
-    if (autocompleteRef.current && inputRef.current) {
-      console.log(bizCoords);
-      console.log(bizLoc);
-    }
-  });
 
   const signUpWithEmailAndPassword = () => {
     if ((!isConsumer && !name) || !email || !password || !confirm) {

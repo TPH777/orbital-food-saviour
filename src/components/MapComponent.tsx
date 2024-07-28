@@ -15,39 +15,35 @@ const MapComponent: React.FC = () => {
   const [cusPos, setCusPos] = useState<{ lat: number; lng: number } | null>(
     null
   );
-  const [setCurrentPosition] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
-  const [activeMarker, setActiveMarker] = useState<number | null>(null);
-  // State for locations from context
+  const [activeMarker, setActiveMarker] = useState<number | string | null>(
+    null
+  );
+
   const { locations } = useLocationContext();
-  // Load the Google Maps script
   const { isLoaded, loadError } = useJsApiLoader({ googleMapsApiKey: gMapKey });
   const { calculateDistances } = useUpdateLocations();
-
   const mapRef = React.useRef<google.maps.Map | null>(null);
+
   useEffect(() => {
     setCusPos(locations.curLoc);
-  });
-  // Calculate distances when customer position is set and map is loaded
+  }, [locations.curLoc]);
+
   useEffect(() => {
     if (cusPos && isLoaded) {
       calculateDistances(cusPos);
     }
-  }, [cusPos, isLoaded]);
+  }, [cusPos, isLoaded, calculateDistances]);
 
-  // Handle marker click and set the active marker
-  const handleActiveMarker = (markerId: number | null) => {
+  const handleActiveMarker = (markerId: number | string | null) => {
     setActiveMarker(markerId);
     if (markerId !== null) {
-      const marker = locations.locs.find((loc) => loc.id === markerId);
-      if (marker && mapRef.current) {
-        mapRef.current.panTo(marker.position);
-        setCurrentPosition(marker.position);
-      } else if (markerId === cusPos?.lat) {
-        mapRef.current.panTo(cusPos);
-        setCurrentPosition(cusPos);
+      if (markerId === "cusPos") {
+        mapRef.current?.panTo(cusPos!);
+      } else {
+        const marker = locations.locs.find((loc) => loc.id === markerId);
+        if (marker) {
+          mapRef.current?.panTo(marker.position);
+        }
       }
     }
   };
@@ -65,13 +61,15 @@ const MapComponent: React.FC = () => {
               zoom={13}
               onClick={() => handleActiveMarker(null)}
               mapContainerStyle={{ width: "100%", height: "90vh" }}
-              onLoad={(map) => (mapRef.current = map)}
+              onLoad={(map) => {
+                mapRef.current = map;
+              }}
             >
               {cusPos && (
                 <MarkerF
-                  key={cusPos.lat}
+                  key={"cusPos"}
                   position={cusPos}
-                  onClick={() => handleActiveMarker(cusPos.lat)}
+                  onClick={() => handleActiveMarker("cusPos")}
                   icon={{
                     url: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
                     size: new google.maps.Size(20, 32),
@@ -79,7 +77,7 @@ const MapComponent: React.FC = () => {
                     anchor: new google.maps.Point(0, 32),
                   }}
                 >
-                  {activeMarker === cusPos.lat && (
+                  {activeMarker === "cusPos" && (
                     <InfoWindowF onCloseClick={() => handleActiveMarker(null)}>
                       <div>Current location</div>
                     </InfoWindowF>
@@ -88,7 +86,7 @@ const MapComponent: React.FC = () => {
               )}
               {locations.locs.map(({ id, name, position, distance }) => (
                 <MarkerF
-                  key={id} // Ensure each marker has a unique key
+                  key={id}
                   position={position}
                   onClick={() => handleActiveMarker(id)}
                 >
@@ -113,8 +111,9 @@ const MapComponent: React.FC = () => {
 
 export default MapComponent;
 
+// Define the structure for the location type
 // interface Location {
-//   id: string;
+//   id: number;
 //   name: string;
 //   distance: string;
 //   position: {
@@ -123,7 +122,7 @@ export default MapComponent;
 //   };
 // }
 
-// // Define the structure for the context type
+// Define the structure for the context type
 // type LocationContextType = {
 //   locations: {
 //     curLoc: {
