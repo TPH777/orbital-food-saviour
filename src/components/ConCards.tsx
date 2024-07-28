@@ -20,8 +20,7 @@ export const ConCards = ({
   setBusiness: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   // Access the user, isConsumer, and locations contexts
-  const { user, isConsumer } = useAuth();
-  const { locations, setLocations } = useLocationContext();
+  const { locations } = useLocationContext();
 
   // Function to get the distance of the business
   const getDistance = (businessName: string) => {

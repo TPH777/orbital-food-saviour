@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { doc, increment, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { ConCards } from "../components/ConCards";
+import MapComponent from "../components/MapComponent"; // Import the MapComponent
 
 export function Home() {
   const [foodList, setFoodList] = useState<FoodItem[]>([]); // State for all posted food items
@@ -139,9 +140,12 @@ export function Home() {
       )}
 
       {/* Display message if no results found */}
-      {!isLoading && searchFoodList.length == 0 && (
+      {!isLoading && searchFoodList.length === 0 && (
         <h1 className="mt-3">No Results</h1>
       )}
+
+      {/* Display MapComponent at the end of the page */}
+      {isConsumer ? <MapComponent /> : null}
     </>
   );
 }

@@ -10,6 +10,7 @@ import { doc, increment, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { deleteWarning } from "../functions/Alert";
 import { ConCards } from "../components/ConCards";
+import MapComponent from "../components/MapComponent"; // Import the MapComponent
 export function FavoritePage() {
   const { user, isConsumer } = useAuth(); // Auth context
   // Redirect the user if not authenticated or not a consumer
@@ -135,6 +136,8 @@ export function FavoritePage() {
       {!isLoading && searchFoodList.length == 0 && (
         <h1 className="mt-3">No Results</h1>
       )}
+      {/* Display MapComponent at the end of the page */}
+      <MapComponent />
     </>
   );
 }

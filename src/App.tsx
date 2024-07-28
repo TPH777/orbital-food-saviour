@@ -25,7 +25,7 @@ function App() {
             </Route>
           </Routes>
         </Router>
-        <MapComponent />
+        {/* <MapComponent /> */}
       </AuthContextProvider>
     </LocationContextProvider>
   );

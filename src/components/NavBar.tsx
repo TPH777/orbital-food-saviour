@@ -15,7 +15,7 @@ export function NavBar() {
   const { user, isConsumer } = useAuth();
   const { updateLocation } = useGetCurLoc();
   const { handleLocationContext, isLoading, locList } = useUpdateLocations();
-  const { locations, setLocations } = useLocationContext();
+  const { locations } = useLocationContext();
   const [isLocationUpdated, setIsLocationUpdated] = useState(false);
 
   const handleLogout = () => {
@@ -37,7 +37,7 @@ export function NavBar() {
   };
 
   useEffect(() => {
-    if (isConsumer && !isLocationUpdated) {
+    if (!isLocationUpdated) {
       const intervalId = setInterval(async () => {
         await locContext();
       }, 2000); // Adjust interval as needed
@@ -90,9 +90,17 @@ export function NavBar() {
             </Navbar.Text>
           </Nav>
         ) : (
-          <Button variant="outline-success" onClick={() => navigate("/login")}>
-            Sign In
-          </Button>
+          <>
+            <Navbar.Text onClick={updateLocation} style={{ cursor: "pointer" }}>
+              Update Current Location
+            </Navbar.Text>
+            <Button
+              variant="outline-success"
+              onClick={() => navigate("/login")}
+            >
+              Sign In
+            </Button>
+          </>
         )}
       </Container>
     </Navbar>
