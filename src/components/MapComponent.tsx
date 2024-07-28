@@ -57,7 +57,7 @@ const MapComponent: React.FC = () => {
   return (
     <Fragment>
       <div className="container">
-        <h1 className="text-center">Location!</h1>
+        <h1 className="text-center"></h1>
         <div style={{ width: "100%", height: "90vh" }}>
           {isLoaded ? (
             <GoogleMap
