@@ -3,7 +3,7 @@ import {
   singaporeLoc,
   Location,
 } from "../context/Location";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { collection, GeoPoint, getDocs } from "firebase/firestore";
 import { db } from "../config/firebase";
 var local = [singaporeLoc.lat, singaporeLoc.lng];

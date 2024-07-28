@@ -15,13 +15,13 @@ const MapComponent: React.FC = () => {
   const [cusPos, setCusPos] = useState<{ lat: number; lng: number } | null>(
     null
   );
-  const [currentPosition, setCurrentPosition] = useState<{
+  const [setCurrentPosition] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
   const [activeMarker, setActiveMarker] = useState<number | null>(null);
   // State for locations from context
-  const { locations, setLocations } = useLocationContext();
+  const { locations } = useLocationContext();
   // Load the Google Maps script
   const { isLoaded, loadError } = useJsApiLoader({ googleMapsApiKey: gMapKey });
   const { calculateDistances } = useUpdateLocations();

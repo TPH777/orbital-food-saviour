@@ -3,7 +3,6 @@ import { timestampToString } from "../functions/Date";
 import { HeartSwitch } from "@anatoliygatt/heart-switch";
 import { FoodItem } from "../interface/FoodItem";
 import { useLocationContext } from "../context/Location";
-import { useAuth } from "../context/Auth";
 
 // ConCards component to display a grid of food cards
 export const ConCards = ({

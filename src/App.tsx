@@ -8,7 +8,6 @@ import { Dashboard } from "./pages/Dashboard";
 import { FavoritePage } from "./pages/Favorites";
 import { AuthContextProvider } from "./context/Auth";
 import { LocationContextProvider } from "./context/Location";
-import MapComponent from "./components/MapComponent";
 
 function App() {
   return (

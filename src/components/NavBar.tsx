@@ -14,7 +14,7 @@ export function NavBar() {
   let navigate = useNavigate();
   const { user, isConsumer } = useAuth();
   const { updateLocation } = useGetCurLoc();
-  const { handleLocationContext, isLoading, locList } = useUpdateLocations();
+  const { handleLocationContext } = useUpdateLocations();
   const { locations } = useLocationContext();
   const [isLocationUpdated, setIsLocationUpdated] = useState(false);
 
