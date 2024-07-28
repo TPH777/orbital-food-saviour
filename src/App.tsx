@@ -7,22 +7,27 @@ import { RegisterPage } from "./pages/Register";
 import { Dashboard } from "./pages/Dashboard";
 import { FavoritePage } from "./pages/Favorites";
 import { AuthContextProvider } from "./context/Auth";
+import { LocationContextProvider } from "./context/Location";
+import MapComponent from "./components/MapComponent";
 
 function App() {
   return (
-    <AuthContextProvider>
-      <Router>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/favorites" element={<FavoritePage />} />
-          </Route>
-        </Routes>
-      </Router>
-    </AuthContextProvider>
+    <LocationContextProvider>
+      <AuthContextProvider>
+        <Router>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/favorites" element={<FavoritePage />} />
+            </Route>
+          </Routes>
+        </Router>
+        {/* <MapComponent /> */}
+      </AuthContextProvider>
+    </LocationContextProvider>
   );
 }
 
