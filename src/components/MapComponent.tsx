@@ -4,12 +4,14 @@ import {
   MarkerF,
   InfoWindowF,
   useJsApiLoader,
+  Libraries,
 } from "@react-google-maps/api";
 import { useLocationContext, singaporeLoc } from "../context/Location";
 import { useUpdateLocations } from "../functions/LocationHandlers";
 
 // Google Maps API key from environment variable
 const gMapKey = import.meta.env.VITE_REACT_APP_gmap;
+const libraries: Libraries = ["places"];
 
 const MapComponent: React.FC = () => {
   const [cusPos, setCusPos] = useState<{ lat: number; lng: number } | null>(
@@ -20,7 +22,10 @@ const MapComponent: React.FC = () => {
   );
 
   const { locations } = useLocationContext();
-  const { isLoaded, loadError } = useJsApiLoader({ googleMapsApiKey: gMapKey });
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: gMapKey,
+    libraries: libraries,
+  });
   const { calculateDistances } = useUpdateLocations();
   const mapRef = React.useRef<google.maps.Map | null>(null);
 
