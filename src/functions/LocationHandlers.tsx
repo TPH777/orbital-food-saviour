@@ -6,6 +6,7 @@ import {
 import { useEffect, useState } from "react";
 import { collection, GeoPoint, getDocs } from "firebase/firestore";
 import { db } from "../config/firebase";
+var local = [singaporeLoc.lat, singaporeLoc.lng];
 
 export const useGetCurLoc = () => {
   const { locations, setLocations } = useLocationContext();
@@ -13,6 +14,8 @@ export const useGetCurLoc = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
+        local[0] = latitude;
+        local[1] = longitude;
         setLocations({
           curLoc: {
             lat: latitude,
@@ -73,6 +76,7 @@ export const useUpdateLocations = () => {
 
   const handleLocationContext = async () => {
     await fetchLocList();
+    local = await getCurLocation();
     const updateLoc: Location[] = locList.map((loc) => {
       const id = loc.id || "";
       const name = loc.name || "";
@@ -91,10 +95,31 @@ export const useUpdateLocations = () => {
 
     setLocations({
       curLoc: {
-        lat: locations.curLoc.lat,
-        lng: locations.curLoc.lng,
+        lat: local[0],
+        lng: local[1],
       },
       locs: updateLoc,
+    });
+    // console.log("help");
+    // console.log(local);
+    // console.log(locations);
+  };
+
+  const getCurLocation = async () => {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          local[0] = latitude;
+          local[1] = longitude;
+          resolve([latitude, longitude]);
+        },
+        (error) => {
+          console.error(error);
+          reject(error);
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
     });
   };
 

@@ -29,7 +29,7 @@ export function NavBar() {
 
   const locContext = async () => {
     await handleLocationContext();
-    console.log("work?");
+    // console.log("work?");
     console.log(locations);
     if (locations.locs && locations.locs.length > 0) {
       setIsLocationUpdated(true);
@@ -46,16 +46,16 @@ export function NavBar() {
     }
   }, [isConsumer, isLocationUpdated, locations.locs]);
 
-  useEffect(() => {
-    const init = async () => {
-      if (isConsumer) {
-        await updateLocation();
-        console.log("Location updated");
-        console.log(locations);
-      }
-    };
-    init();
-  }, [isConsumer]);
+  // useEffect(() => {
+  //   const init = async () => {
+  //     if (isConsumer) {
+  //       await updateLocation();
+  //       console.log("Location updated");
+  //       console.log(locations);
+  //     }
+  //   };
+  //   init();
+  // }, [isConsumer]);
 
   return (
     <Navbar className="bg-body-tertiary" bg="dark" data-bs-theme="dark">
@@ -80,9 +80,6 @@ export function NavBar() {
                   style={{ cursor: "pointer" }}
                 >
                   Update Location
-                </Navbar.Text>
-                <Navbar.Text onClick={locContext} style={{ cursor: "pointer" }}>
-                  DB
                 </Navbar.Text>
               </>
             ) : (
