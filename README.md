@@ -1,30 +1,45 @@
-# React + TypeScript + Vite
+# Food Saviour - Project Gemini
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Description
+Food Saviour is a website designed to connect businesses with consumers who are interested in saving money, enjoying late-night food, or helping to reduce food waste. The platform allows businesses to post discounted food items that are nearing their expiration date, while providing consumers with real-time updates and notifications about these time-sensitive deals.
 
-Currently, two official plugins are available:
+## Motivation
+Our initiative addresses the urgent need to combat food wastage and promote affordability for consumers. Many perfectly edible items, such as bread, are often discarded if unsold by closing hours. By offering a platform for businesses to sell these items at a discount, we aim to minimize waste, support businesses, and provide consumers with quality meals at reduced prices. This approach also contributes to environmental sustainability by diverting food from landfills.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
+- **Database**: Stores food information including name, description, photos, price, expiry date, and nutritional details.
+- **Business Management**: Allows businesses to create, update, and delete their food listings.
+- **User Queries**: Enables users to search and filter discounted food items based on categories like cuisine type, dietary preferences, price range, and location.
+- **Location Integration**: Uses Google Maps API to display nearby food establishments.
+- **User Preferences**: Allows users to save their favorite stores and food items for quick access.
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **Frontend**:
+  - React
+  - Bootstrap
+  - SweetAlert UI (credit to [SweetAlert](https://sweetalert.js.org))
+  - heart-switch (credit to [heart-switch](https://github.com/anatoliygatt/heart-switch))
 
-- Configure the top-level `parserOptions` property like this:
+- **Database and Deployment**:
+  - Firebase
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+- **Version Control**:
+  - GitHub
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+- **Code**:
+  - TypeScript
+  - HTML
+  - CSS
+
+- **API**:
+  - Google Maps API
+
+## Additional Resources
+- **[Poster](https://drive.google.com/file/d/1xC3xbdOJDUa53EPaGEIML2UOm8VLTxMZ/view?usp=drive_link)**
+- **[Video](https://drive.google.com/file/d/1mK6uaaia8I2-4mG2cvRTnZjMTxKZG8lj/view?usp=drive_link)**
+- **[Documentation](https://drive.google.com/file/d/1-NyX9lq6dc6KNhf80IAxwK4mnK8hCZXz/view?usp=drive_link)**
+
+## Author
+- Tan Ping Hui
+- Wong Weng Hong
