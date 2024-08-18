@@ -41,5 +41,5 @@ Our initiative addresses the urgent need to combat food wastage and promote affo
 - **[Documentation](https://drive.google.com/file/d/1-NyX9lq6dc6KNhf80IAxwK4mnK8hCZXz/view?usp=drive_link)**
 
 ## Author
-- Tan Ping Hui
-- Wong Weng Hong
+- [Tan Ping Hui](https://github.com/TPH777)
+- [Wong Weng Hong](https://github.com/wongwh2002) 
