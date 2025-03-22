@@ -1,7 +1,7 @@
 # Food Saviour - Project Gemini
 
 ## Description
-Food Saviour is a website designed to connect businesses with consumers who are interested in saving money, enjoying late-night food, or helping to reduce food waste. The platform allows businesses to post discounted food items that are nearing their expiration date, while providing consumers with real-time updates and notifications about these time-sensitive deals.
+[Food Saviour](https://foodsaviour.web.app/#/) is a website designed to connect businesses with consumers who are interested in saving money, enjoying late-night food, or helping to reduce food waste. The platform allows businesses to post discounted food items that are nearing their expiration date, while providing consumers with real-time updates and notifications about these time-sensitive deals.
 
 ## Motivation
 Our initiative addresses the urgent need to combat food wastage and promote affordability for consumers. Many perfectly edible items, such as bread, are often discarded if unsold by closing hours. By offering a platform for businesses to sell these items at a discount, we aim to minimize waste, support businesses, and provide consumers with quality meals at reduced prices. This approach also contributes to environmental sustainability by diverting food from landfills.
